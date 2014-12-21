@@ -8,6 +8,7 @@ var request = require('request');
 var parseURL = require('url');
 var sessionQueue = require('./session-queue');
 var promiseYouTry = require('./promise-you-try');
+var sessions = require('./sessions');
 
 function copyDirectoryContents(src, dst) {
 	var d = q.defer();
@@ -127,10 +128,14 @@ function start(options)
 				]);
 
 				sessionQueue.add(function (sessionId) {
-					d.resolve({
+					var actualCapabilities = {
 						browserName: browserName,
 						sessionId: sessionId
-					});
+					};
+
+					sessions.get(sessionId).actualCapabilities = actualCapabilities;
+
+					d.resolve(actualCapabilities);
 				}, function () {
 					child.kill();
 					promiseYouTry(function () {

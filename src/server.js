@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var sessionQueue = require('./session-queue');
 var routes = require('./routes');
+var sessions = require('./sessions');
 
 var app = express();
 
@@ -15,25 +16,25 @@ app.use(bodyParser.json());
 var server = http.createServer(app);
 var io = socket_io(server);
 
-var sessionId = 0;
-var sessions = {};
-
 io.on('connection', function (socket) {
 	
-	++sessionId;	
 	var sess = sessionQueue.shift();
-	sess.onCreated(sessionId);
 
-	socket.on('disconnect', (function (sessionId) {
-		return function () {
-			sess.onDestroyed();
-			delete sessions[sessionId];
+	sessions.create(function (sessionId) {
+
+		socket.on('disconnect', function () {
+			sessions.destroy(sessionId);
+		});
+
+		return {
+			socket: socket,
+			sessionId: sessionId,
+			onDestroyed: sess.onDestroyed
 		};
-	})(sessionId));
 
-	sessions[sessionId] = {
-		socket: socket
-	};
+	}).then(function (sessionId) {
+		sess.onCreated(sessionId);
+	});
 });
 
 var serverAddress;
@@ -69,13 +70,10 @@ function start (port) {
 function stop() {
 	var d = q.defer();
 
-	_.each(sessions, function (session) {
-		session.socket.disconnect();
+	sessions.destroyAll().then(function () {
+		io.close();
+		d.resolve();
 	});
-
-	io.close();
-
-	d.resolve();
 
 	return d.promise;
 }
