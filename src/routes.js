@@ -5,7 +5,7 @@ function setup(app, serverAddress) {
 	app.get('/', function (req, res) {
 		res.send('BrowserControl is up and running, ready to kick some HTML a**.');
 	});
-	
+
 	app.post('/session', function (req, res) {
 		browser.start({
 			serverAddress: serverAddress,
@@ -54,6 +54,30 @@ function setup(app, serverAddress) {
 
 	app.get('/sessions', function (req, res) {
 		res.send(sessions.getAllCapabilities());
+	});
+
+	app.post('/session/:id/url', function (req, res) {
+		sessions.setURL(req.params.id, req.body.url)
+		.then(function () {
+			res.send({});
+		})
+		.fail(function (reason) {
+			res.status(500).send({
+				ressage: reason.toString()
+			});
+		});
+	});
+
+	app.get('/session/:id/url', function (req, res) {
+		sessions.getURL(req.params.id)
+		.then(function (url) {
+			res.send(url);
+		})
+		.fail(function (reason) {
+			res.status(500).send({
+				ressage: reason.toString()
+			});
+		});
 	});
 }
 
