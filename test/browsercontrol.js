@@ -105,7 +105,6 @@ describe('BrowserControl', function() {
 		});
 
 		it('should navigate to a page', function (done) {
-			this.timeout(10000);
 			var url = 'file://' + __dirname + '/pages/index.html';
 
 			post('/session/1/url', {url: url})
