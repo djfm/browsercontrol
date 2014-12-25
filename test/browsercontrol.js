@@ -2,6 +2,7 @@
 
 var chai = require('chai');
 var q = require('q');
+var _ = require('underscore');
 var request = require('request');
 
 chai.use(require('chai-as-promised'));
@@ -118,6 +119,63 @@ describe('BrowserControl', function() {
 			.fail(done);
 		});
 
+		describe('findElement', function () {
+			_.each({
+				'css selector': ['#hello', '#not-hello'],
+				'id': ['hello', 'not-hello'],
+				'class name': ['some-class', 'some-non-existing-class'],
+				'name': ['stain', 'not-stain'],
+				'link text': ["I'm a LINK", "I'm a"],
+				'partial link text': ["I'm a", "I'm not a"],
+				'tag name': ["a", "b"],
+				'xpath': ["//a", "//b"],
+			}, function (value, using) {
+				it('Should find `' + value[0] + '` using `' + using + '`', function (done) {
+					post('/session/1/element', {
+						using: using,
+						value: value[0]
+					}).then(function (response) {
+						response.statusCode.should.equal(200);
+						done();
+					})
+					.fail(done);
+				});
+				it('Should not find `' + value[1] + '` using `' + using + '`', function (done) {
+					post('/session/1/element', {
+						using: using,
+						value: value[1]
+					}).then(function (response) {
+						response.statusCode.should.equal(500);
+						response.body.class.should.equal('NoSuchElement');
+						done();
+					})
+					.fail(done);
+				});
+			});
+		});
+
+		describe('findElements', function () {
+			_.each({
+				'css selector': {'#hello': 1},
+				'id': {'hello': 1},
+				'class name': {'three': 3},
+				'name': {'stain': 1}
+			}, function (values, using) {
+				_.each(values, function (count, selector) {
+					it('Should find ' + count + ' result(s) for `' + selector + '` using `' + using + '`', function (done) {
+						post('/session/1/elements', {
+							using: using,
+							value: selector
+						}).then(function (response) {
+							response.statusCode.should.equal(200);
+							response.body.length.should.equal(count);
+							done();
+						})
+						.fail(done);
+					});
+				});
+			});
+		});
 	});
 });
 

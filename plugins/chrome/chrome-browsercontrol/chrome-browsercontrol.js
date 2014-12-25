@@ -4,7 +4,50 @@ var socket = io(browsercontrol.serverAddress);
 
 var events = {};
 
-function on(command, callback) {
+var tabsListening = {};
+
+chrome.runtime.onMessage.addListener(function (request, sender, respond) {
+	if ('listening' === request.status) {
+		var tabListening = tabsListening[sender.tab.id] = tabsListening[sender.tab.id] || {callbacksQueue: []};
+		tabListening.status = 'listening';
+
+		// Called enqueued callbacks if any
+		for (var i = 0, len = tabListening.callbacksQueue.length; i < len; ++i) {
+			tabListening.callbacksQueue[i]();
+		}
+
+		// clear them
+		tabListening.callbacksQueue = [];
+
+		respond({});
+	}
+});
+
+function askTab (tabId, query, callback) {
+
+	function request () {
+		chrome.tabs.sendMessage(tabId, query, callback);
+	}
+
+	if (!tabsListening[tabId]) {
+		tabsListening[tabId] = {
+			status: 'not listening',
+			callbacksQueue: [request]
+		};
+	} else if ('listening' === tabsListening[tabId].status) {
+		request();
+	} else {
+		tabsListening[tabId].callbacksQueue.push(request);
+	}
+}
+
+function askActiveTab (query, callback) {
+	withActiveTab(function (tab) {
+			askTab(tab.id, query, callback);
+	});
+}
+
+function on (command, callback) {
 	if (!events.hasOwnProperty(command)) {
 		events[command] = true;
 		socket.on(command, function (data) {
@@ -57,3 +100,16 @@ on('getURL', function (nothing, respond) {
 		respond(tab.url);
 	});
 });
+
+var passAlongToActiveTab = ['findElement', 'findElements'];
+
+for (var i = 0, len = passAlongToActiveTab.length; i < len; ++i) {
+	(function (command) {
+		on(command, function (query, respond) {
+			askActiveTab({
+				command: command,
+				query: query
+			}, respond);
+		});
+	})(passAlongToActiveTab[i]);
+}

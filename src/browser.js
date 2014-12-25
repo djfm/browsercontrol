@@ -51,11 +51,13 @@ function writeExtensionManifest(serverAddress, manifestPath) {
 		name: "Chrome Browsercontrol",
 		description: "This extension should control the Chrome browser for fun and profit.",
 		version: "0.0.1",
-
 		background: {
 			page: "chrome-browsercontrol.html"
 		},
-
+		content_scripts: [{
+			matches: ["<all_urls>"],
+			js: ["jquery-2.1.3.min.js", "dom-accessor.js"]
+		}],
 		permissions: ["tabs", "http://" + parseURL.parse(serverAddress).hostname + "/"]
 	};
 
@@ -100,7 +102,7 @@ function start(options)
 		} else {
 
 			var defaultProfile = path.join(__dirname, '..', 'fixtures', 'chrome', 'default-profile');
-			
+
 			var sourceExtensionPath = path.join(__dirname, '..', 'plugins', 'chrome', 'chrome-browsercontrol');
 			var extensionPath = path.join(profileDirectory, 'chrome-browsercontrol');
 			var settingsPath = path.join(extensionPath, 'chrome-browsercontrol-settings.js');
