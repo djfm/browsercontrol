@@ -82,6 +82,20 @@ function setup(app, serverAddress) {
 	app.post('/session/:id/elements', function (req, res) {
 		promiseResponse(res, sessions.findElements(req.params.id, req.body));
 	});
+
+	app.get('/session/:id/element/:elementId', function (req, res) {
+		promiseResponse(res, sessions.describeElement(req.params.id, req.params.elementId));
+	});
+
+	app.post('/session/:id/element/:elementId/element', function (req, res) {
+		req.body.root = req.params.elementId;
+		promiseResponse(res, sessions.findElement(req.params.id, req.body));
+	});
+
+	app.post('/session/:id/element/:elementId/elements', function (req, res) {
+		req.body.root = req.params.elementId;
+		promiseResponse(res, sessions.findElements(req.params.id, req.body));
+	});
 }
 
 exports.setup = setup;

@@ -1,4 +1,6 @@
-/* global chrome, $, $x */
+/* global chrome, $ */
+
+/* global StaleElementReference */
 
 function error(klass, message) {
     return {
@@ -11,7 +13,11 @@ function error(klass, message) {
 chrome.runtime.onMessage.addListener(function (request, sender, respond) {
     if (request.command) {
         if (commands[request.command]) {
-            commands[request.command](request.query, respond);
+            try {
+                commands[request.command](request.query, respond);
+            } catch (err) {
+                respond(error(err.constructor.name, err.toString()));
+            }
         } else {
             respond(error('UnknownCommand', request.command));
         }
@@ -32,13 +38,18 @@ function assignElementId (element) {
     return id;
 }
 
-function getElement(elementId) {
+function getElement (elementId) {
+
+    if (!elements.cache[elementId] || !elements.cache[elementId].ownerDocument.contains(elements.cache[elementId])) {
+        throw new StaleElementReference();
+    }
+
     return elements.cache[elementId];
 }
 
 function findElement (query, respond) {
+    query.first = true;
     findElements(query, function (results) {
-
         if (results.length === 0) {
             respond(error('NoSuchElement'));
         } else {
@@ -70,7 +81,15 @@ function findElements (query, respond) {
     }
 
     if (selector && !xpath) {
-        $(selector).each(function (i, element) {
+        var list;
+
+        if (query.root) {
+            list = $(getElement(query.root)).find(selector);
+        } else {
+            list = $(selector);
+        }
+
+        list.each(function (i, element) {
             if (query.using === 'link text') {
                 if ($(element).text() !== query.value) {
                     return;
@@ -81,17 +100,26 @@ function findElements (query, respond) {
     } else if (selector && xpath) {
         var iterator = document.evaluate(selector, document);
         var element;
-        while (element = iterator.iterateNext()){
+        while ((element = iterator.iterateNext())) {
             elements.push({ELEMENT: assignElementId(element)});
+            if (query.first) {
+                break;
+            }
         }
     }
 
     respond(elements);
 }
 
+function describeElement (id, respond) {
+    getElement(id);
+    respond({ELEMENT: id});
+}
+
 var commands = {
     findElement: findElement,
-    findElements: findElements
+    findElements: findElements,
+    describeElement: describeElement
 };
 
 chrome.runtime.sendMessage({status: 'listening'});

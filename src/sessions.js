@@ -93,6 +93,10 @@ function findElements(sessionId, query) {
 	return execute(sessionId, 'findElements', query);
 }
 
+function describeElement(sessionId, elementId) {
+	return execute(sessionId, 'describeElement', elementId);
+}
+
 exports.create = create;
 exports.destroy = destroy;
 exports.setURL = setURL;
@@ -102,3 +106,4 @@ exports.get = get;
 exports.getAllCapabilities = getAllCapabilities;
 exports.findElement = findElement;
 exports.findElements = findElements;
+exports.describeElement = describeElement;

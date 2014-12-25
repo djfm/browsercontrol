@@ -152,6 +152,23 @@ describe('BrowserControl', function() {
 					.fail(done);
 				});
 			});
+
+			it('Should throw an error if I try to get an element that does NOT exist', function (done) {
+				get('/session/1/element/1000').then(function (response) {
+					response.statusCode.should.equal(500);
+					response.body.class.should.equal('StaleElementReference');
+					done();
+				})
+				.fail(done);
+			});
+
+			it('Should not throw an error if I try to get an element that DOES exist', function (done) {
+				get('/session/1/element/1').then(function (response) {
+					response.statusCode.should.equal(200);
+					done();
+				})
+				.fail(done);
+			});
 		});
 
 		describe('findElements', function () {
@@ -174,6 +191,44 @@ describe('BrowserControl', function() {
 						.fail(done);
 					});
 				});
+			});
+
+			describe('Nested', function () {
+				it('Should find a nested element', function (done) {
+					post('/session/1/element', {using: 'css selector', value: '#root'})
+					.get('response').get('body').get('ELEMENT')
+					.then(function (elementId) {
+						return post('/session/1/element/' + elementId + '/elements', {using: 'css selector', value: '.child'});
+					})
+					.then(function (response) {
+						response.statusCode.should.equal(200);
+						response.body.length.should.equal(1);
+						done();
+					})
+					.fail(done);
+				});
+				it('Should not find a nested element that is not there', function (done) {
+					post('/session/1/element', {using: 'css selector', value: '#root'})
+					.get('response').get('body').get('ELEMENT')
+					.then(function (elementId) {
+						return post('/session/1/element/' + elementId + '/elements', {using: 'css selector', value: '.not-child'});
+					})
+					.then(function (response) {
+						response.statusCode.should.equal(200);
+						response.body.length.should.equal(0);
+						done();
+					})
+					.fail(done);
+				});
+				it('Should throw a StaleElementReference if the root is not there', function (done) {
+					post('/session/1/element/6666/elements', {using: 'id', value: 'bob'})
+					.then(function (response) {
+						response.statusCode.should.equal(500);
+						response.body.class.should.equal('StaleElementReference');
+						done();
+					})
+					.fail(done);
+				})
 			});
 		});
 	});

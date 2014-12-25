@@ -101,7 +101,7 @@ on('getURL', function (nothing, respond) {
 	});
 });
 
-var passAlongToActiveTab = ['findElement', 'findElements'];
+var passAlongToActiveTab = ['findElement', 'findElements', 'describeElement'];
 
 for (var i = 0, len = passAlongToActiveTab.length; i < len; ++i) {
 	(function (command) {

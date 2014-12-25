@@ -56,7 +56,7 @@ function writeExtensionManifest(serverAddress, manifestPath) {
 		},
 		content_scripts: [{
 			matches: ["<all_urls>"],
-			js: ["jquery-2.1.3.min.js", "dom-accessor.js"]
+			js: ["jquery-2.1.3.min.js", "errors.js", "dom-accessor.js"]
 		}],
 		permissions: ["tabs", "http://" + parseURL.parse(serverAddress).hostname + "/"]
 	};
