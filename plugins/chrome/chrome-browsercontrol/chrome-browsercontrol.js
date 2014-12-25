@@ -6,6 +6,9 @@ var events = {};
 
 var tabsListening = {};
 
+/**
+ * Determine whether each tab is ready to reply to commands
+ */
 chrome.runtime.onMessage.addListener(function (request, sender, respond) {
 	if ('listening' === request.status) {
 		var tabListening = tabsListening[sender.tab.id] = tabsListening[sender.tab.id] || {callbacksQueue: []};
@@ -23,6 +26,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, respond) {
 	}
 });
 
+/**
+ * Send a message to a tab, queueing the request if
+ * the tab has not yet sent us a message telling that it
+ * is listening.
+ */
 function askTab (tabId, query, callback) {
 
 	function request () {
@@ -41,6 +49,9 @@ function askTab (tabId, query, callback) {
 	}
 }
 
+/**
+ * Shortcut to pass a query to the active tab.
+ */
 function askActiveTab (query, callback) {
 	withActiveTab(function (tab) {
 			askTab(tab.id, query, callback);

@@ -122,4 +122,5 @@ var commands = {
     describeElement: describeElement
 };
 
+// Inform the background page that we're ready to take orders.
 chrome.runtime.sendMessage({status: 'listening'});

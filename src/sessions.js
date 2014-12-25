@@ -5,6 +5,12 @@ var sessionsCount = 0;
 
 var sessions = {};
 
+/**
+ * Send the `command` with `payload` to the other side of the socket
+ * associated to the session `sessionId`.
+ * Returns a promise for whatever the script on the other side of
+ * the socket will return.
+ */
 function execute (sessionId, command, payload) {
 	var d = q.defer();
 
@@ -85,17 +91,13 @@ function getAllCapabilities () {
 	});
 }
 
-function findElement(sessionId, query) {
-	return execute(sessionId, 'findElement', query);
-}
+var passAlongToExecute = ['findElement', 'findElements', 'describeElement'];
 
-function findElements(sessionId, query) {
-	return execute(sessionId, 'findElements', query);
-}
-
-function describeElement(sessionId, elementId) {
-	return execute(sessionId, 'describeElement', elementId);
-}
+_.each(passAlongToExecute, function (method) {
+	exports[method] = function (sessionId, data) {
+		return execute(sessionId, method, data);
+	};
+});
 
 exports.create = create;
 exports.destroy = destroy;
@@ -104,6 +106,3 @@ exports.getURL = getURL;
 exports.destroyAll = destroyAll;
 exports.get = get;
 exports.getAllCapabilities = getAllCapabilities;
-exports.findElement = findElement;
-exports.findElements = findElements;
-exports.describeElement = describeElement;
