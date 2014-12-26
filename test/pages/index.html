@@ -19,5 +19,15 @@
         </div>
         <div class="child"></div>
         <div class=".not-child"></div>
+
+        <div id="click" onclick="javascript:this.innerHTML='<span id=&quot;clicked&quot;>clicked, thanks!</span>'">
+            Click me please!
+        </div>
+
+        <button id="cannot-click-disabled" disabled>Cannot Click</button>
+        <span id="cannot-click-display-none" style="display:none">I'm invisible</span>
+        <span id="cannot-click-visibility-hidden" style="visibility:hidden">I'm invisible</span>
+        <div id="cannot-click-zero-width" style="width:0px;overflow:hidden">I'm invisible</div>
+        <div id="cannot-click-zero-height" style="height:0px;overflow:hidden">I'm invisible</div>
     </body>
 </html>

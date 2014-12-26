@@ -70,6 +70,10 @@ function setup (app, eventEmitter, sessions) {
         respondWithPromise(res, sessions.findElements(req.params.sessionId, req.body));
     });
 
+    app.post('/session/:sessionId/element/:elementId/click', function (req, res) {
+        respondWithPromise(res, sessions.clickElement(req.params.sessionId, req.params.elementId));
+    });
+
 }
 
 exports.setup = setup;

@@ -37,6 +37,8 @@ module.exports = function () {
 
         socket.emit(command, data);
 
+        //console.log(command, data);
+
         return d.promise;
     }
 
@@ -100,7 +102,8 @@ module.exports = function () {
         'setURL',
         'findElement',
         'findElements',
-        'describeElement'
+        'describeElement',
+        'clickElement'
     ];
 
     _.each(extensionMethods, function (method) {

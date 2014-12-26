@@ -6,8 +6,6 @@ var events = {};
 
 var tabsListening = {};
 
-socket.emit('emitEvent', browsercontrol.startUpResolverEventName);
-
 /**
  * Determine whether each tab is ready to reply to commands
  */
@@ -56,7 +54,7 @@ function askTab (tabId, query, callback) {
  */
 function askActiveTab (query, callback) {
 	withActiveTab(function (tab) {
-			askTab(tab.id, query, callback);
+		askTab(tab.id, query, callback);
 	});
 }
 
@@ -114,7 +112,12 @@ on('getURL', function (nothing, respond) {
 	});
 });
 
-var passAlongToActiveTab = ['findElement', 'findElements', 'describeElement'];
+var passAlongToActiveTab = [
+	'findElement',
+	'findElements',
+	'describeElement',
+	'clickElement'
+];
 
 for (var i = 0, len = passAlongToActiveTab.length; i < len; ++i) {
 	(function (command) {
@@ -126,3 +129,6 @@ for (var i = 0, len = passAlongToActiveTab.length; i < len; ++i) {
 		});
 	})(passAlongToActiveTab[i]);
 }
+
+// Signal server on the other end that this browser is ready for work.
+socket.emit('emitEvent', browsercontrol.startUpResolverEventName);

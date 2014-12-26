@@ -1,1 +1,1 @@
-require('./server').start(2048);
+require('./browsercontrol').start(2048);

@@ -1,6 +1,6 @@
 /* global chrome, $ */
 
-/* global StaleElementReference */
+/* global StaleElementReference, ElementIsDisabled, ElementNotVisible */
 
 function error(klass, message) {
     return {
@@ -117,10 +117,35 @@ function describeElement (id, respond) {
     respond({ELEMENT: id});
 }
 
+function ensureElementCanBeInteractedWith ($element) {
+    if (
+        !$element.is(':visible') ||
+        $element.css('visibility') === 'hidden' ||
+        $element.width() === 0 ||
+        $element.height() === 0
+    ) {
+        throw new ElementNotVisible();
+    }
+
+    if ($element.prop('disabled')) {
+        throw new ElementIsDisabled();
+    }
+}
+
+function clickElement (id, respond) {
+    var element = $(getElement(id));
+
+    ensureElementCanBeInteractedWith(element);
+
+    element.click();
+    respond({});
+}
+
 var commands = {
     findElement: findElement,
     findElements: findElements,
-    describeElement: describeElement
+    describeElement: describeElement,
+    clickElement: clickElement
 };
 
 // Inform the background page that we're ready to take orders.

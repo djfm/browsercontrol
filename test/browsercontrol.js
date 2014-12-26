@@ -260,7 +260,46 @@ describe('BrowserControl', function() {
 						done();
 					})
 					.fail(done);
+				});
+			});
+		});
+
+		describe('Click', function () {
+			it('Should click on an element', function (done) {
+				post('/session/1/element', {using: 'id', value: 'click'})
+				.then(function (response) {
+					return post('/session/1/element/' + response.body.ELEMENT + '/click');
 				})
+				.then(function () {
+					return post('/session/1/element', {using: 'css selector', value: '#clicked'});
+				})
+				.then(function (response) {
+					response.statusCode.should.equal(200);
+					done();
+				})
+				.fail(done);
+			});
+
+			var cannotClick = {
+				'#cannot-click-disabled': 'ElementIsDisabled',
+				'#cannot-click-display-none': 'ElementNotVisible',
+				'#cannot-click-visibility-hidden': 'ElementNotVisible',
+				'#cannot-click-zero-width': 'ElementNotVisible',
+				'#cannot-click-zero-height': 'ElementNotVisible'
+			};
+
+			_.each(cannotClick, function (expectedError, cssSelector) {
+				it('Should not be able to click on `' + cssSelector + '` (because `' + expectedError +  '`)', function (done) {
+					post('/session/1/element', {using: 'css selector', value: cssSelector}).get('body').get('ELEMENT')
+					.then(function (elementId) {
+						return post('/session/1/element/' + elementId + '/click');
+					}).then(function (response) {
+						response.statusCode.should.equal(500);
+						response.body.class.should.equal(expectedError);
+						done();
+					})
+					.fail(done);
+				});
 			});
 		});
 	});
