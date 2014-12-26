@@ -174,6 +174,33 @@ describe('BrowserControl', function() {
 				})
 				.fail(done);
 			});
+
+			describe('Nested', function () {
+				it('Should find a nested element by css selector', function (done) {
+					post('/session/1/element', {using: 'css selector', value: '#root'})
+					.get('response').get('body').get('ELEMENT')
+					.then(function (elementId) {
+						return post('/session/1/element/' + elementId + '/element', {using: 'css selector', value: '.child'});
+					})
+					.then(function (response) {
+						response.statusCode.should.equal(200);
+						done();
+					})
+					.fail(done);
+				});
+				it('Should find a nested element by xpath', function (done) {
+					post('/session/1/element', {using: 'css selector', value: '#root'})
+					.get('response').get('body').get('ELEMENT')
+					.then(function (elementId) {
+						return post('/session/1/element/' + elementId + '/element', {using: 'xpath', value: './span'});
+					})
+					.then(function (response) {
+						response.statusCode.should.equal(200);
+						done();
+					})
+					.fail(done);
+				});
+			});
 		});
 
 		describe('findElements', function () {

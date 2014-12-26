@@ -98,7 +98,8 @@ function findElements (query, respond) {
             elements.push({ELEMENT: assignElementId(element)});
         });
     } else if (selector && xpath) {
-        var iterator = document.evaluate(selector, document);
+        var root = query.root ? getElement(query.root) : document;
+        var iterator = document.evaluate(selector, root);
         var element;
         while ((element = iterator.iterateNext())) {
             elements.push({ELEMENT: assignElementId(element)});
