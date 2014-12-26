@@ -6,6 +6,8 @@ var events = {};
 
 var tabsListening = {};
 
+socket.emit('emitEvent', browsercontrol.startUpResolverEventName);
+
 /**
  * Determine whether each tab is ready to reply to commands
  */

@@ -1,14 +1,14 @@
-var q = require('q');
-var temp = require('temp').track();
-var spawn = require('child_process').spawn;
-var path = require('path');
-var ncp = require('ncp');
-var fs = require('fs.extra');
-var request = require('request');
-var parseURL = require('url');
-var sessionQueue = require('./session-queue');
-var promiseYouTry = require('./promise-you-try');
-var sessions = require('./sessions');
+var _ 				= require('underscore');
+var q 				= require('q');
+var temp 			= require('temp').track();
+var spawn 			= require('child_process').spawn;
+var path 			= require('path');
+var ncp 			= require('ncp');
+var fs 				= require('fs.extra');
+var request 		= require('request');
+var parseURL 		= require('url');
+var promiseYouTry 	= require('./promise-you-try');
+var seqid			= require('./seqid');
 
 function copyDirectoryContents(src, dst) {
 	var d = q.defer();
@@ -24,12 +24,10 @@ function copyDirectoryContents(src, dst) {
 	return d.promise;
 }
 
-function writeExtensionSettings(serverAddress, settingsPath) {
+function writeExtensionSettings(extensionSettings, settingsPath) {
 	var d = q.defer();
 
-	var settings = 'var browsercontrol = ' + JSON.stringify({
-		'serverAddress': serverAddress
-	}) + ';';
+	var settings = 'var browsercontrol = ' + JSON.stringify(extensionSettings) + ';';
 
 	fs.writeFile(settingsPath, settings, function(err) {
 		if (err) {
@@ -88,11 +86,18 @@ function writeExtensionSocketIoClient(serverAddress, path) {
 	return d.promise;
 }
 
-function start(options)
+function start(options, eventEmitter, serverAddress, sessions)
 {
-	var serverAddress = options.serverAddress;
+	options = _.defaults(options, {
+		requiredCapabilities: {
+			browserName: 'chrome'
+		},
+		desiredCapabilities: {
 
-	var browserName = options.requiredCapabilities.browserName || options.desiredCapabilities.browserName || 'chrome';
+		}
+	});
+
+	var browserName = options.requiredCapabilities.browserName;
 
 	var d = q.defer();
 
@@ -100,27 +105,25 @@ function start(options)
 		if (err) {
 			d.reject(err);
 		} else {
+			var startUpResolverEventName = seqid.get('BrowserStarted');
 
 			var defaultProfile = path.join(__dirname, '..', 'fixtures', 'chrome', 'default-profile');
-
 			var sourceExtensionPath = path.join(__dirname, '..', 'plugins', 'chrome', 'chrome-browsercontrol');
 			var extensionPath = path.join(profileDirectory, 'chrome-browsercontrol');
-			var settingsPath = path.join(extensionPath, 'chrome-browsercontrol-settings.js');
-			var manifestPath = path.join(extensionPath, 'manifest.json');
-			var socketIOPath = path.join(extensionPath, 'socket.io.js');
 
 			copyDirectoryContents(defaultProfile, profileDirectory)
 			.then(function () {
 				return copyDirectoryContents(sourceExtensionPath, extensionPath);
 			})
 			.then(function () {
-				return writeExtensionSettings(serverAddress, settingsPath);
-			})
-			.then(function () {
-				return writeExtensionManifest(serverAddress, manifestPath);
-			})
-			.then(function () {
-				return writeExtensionSocketIoClient(serverAddress, socketIOPath);
+				return q.all([
+					writeExtensionSettings({
+						serverAddress: serverAddress,
+						startUpResolverEventName: startUpResolverEventName
+					}, path.join(extensionPath, 'chrome-browsercontrol-settings.js')),
+					writeExtensionManifest(serverAddress, path.join(extensionPath, 'manifest.json')),
+					writeExtensionSocketIoClient(serverAddress, path.join(extensionPath, 'socket.io.js'))
+				]);
 			})
 			.then(function () {
 				var child = spawn('google-chrome', [
@@ -129,32 +132,30 @@ function start(options)
 					serverAddress
 				]);
 
-				sessionQueue.add(function (sessionId) {
-					var actualCapabilities = {
-						browserName: browserName,
-						sessionId: sessionId
-					};
+				eventEmitter.on(startUpResolverEventName, function (eventData) {
+					d.resolve(sessions.create({
+						socket: eventData.socket,
+						destroy: function () {
+							child.kill();
+							return promiseYouTry(function () {
+								var d = q.defer();
 
-					sessions.get(sessionId).actualCapabilities = actualCapabilities;
+								fs.rmrf(profileDirectory, function (err) {
+									if (err) {
+										d.reject(err);
+									} else {
+										d.resolve();
+									}
+								});
 
-					d.resolve(actualCapabilities);
-				}, function () {
-					child.kill();
-					promiseYouTry(function () {
-						var d = q.defer();
-
-						fs.rmrf(profileDirectory, function (err) {
-							if (err) {
-								d.reject(err);
-							} else {
-								d.resolve();
-							}
-						});
-
-						return d.promise;
-					});
+								return d.promise;
+							});
+						},
+						capabilities: _.extend(eventData.capabilities || {}, {
+							browserName: 'chrome'
+						})
+					}));
 				});
-
 			}).fail(d.reject);
 		}
 	});

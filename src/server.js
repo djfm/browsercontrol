@@ -1,88 +1,71 @@
-var express = require('express');
-var http = require('http');
-var socket_io = require('socket.io');
-var q = require('q');
-var _ = require('underscore');
-var bodyParser = require('body-parser');
+var bodyParser  = require('body-parser');
+var http        = require('http');
+var express     = require('express');
+var q           = require('q');
+var socket_io   = require('socket.io');
 
-var sessionQueue = require('./session-queue');
-var routes = require('./routes');
-var sessions = require('./sessions');
-
-var app = express();
-
-app.use(bodyParser.json());
-
-var server = http.createServer(app);
-var io = socket_io(server);
-
-io.on('connection', function (socket) {
-	
-	var sess = sessionQueue.shift();
-
-	sessions.create(function (sessionId) {
-
-		socket.on('disconnect', function () {
-			sessions.destroy(sessionId);
-		});
-
-		return {
-			socket: socket,
-			sessionId: sessionId,
-			onDestroyed: sess.onDestroyed
-		};
-
-	}).then(function (sessionId) {
-		sess.onCreated(sessionId);
-	});
-});
-
-var serverAddress;
-
-function start (port) {
-
-	var d = q.defer();
-
-	try {
-		server.listen(port, function () {
-			var host = server.address().address;
-			var port = server.address().port;
-
-			if (host === '0.0.0.0') {
-				host = '127.0.0.1';
-			}
-			
-			serverAddress = 'http://' + host + ':' + port;
-			routes.setup(app, serverAddress);
-
-
-			console.log('Browser Control listening at %s', serverAddress);
-
-			d.resolve(serverAddress);
-		});
-	} catch (e) {
-		d.reject(e);
-	}
-
-	return d.promise;
+function isThenable (object) {
+    return object && Object.prototype.toString.call(object.then) === '[object Function]';
 }
 
-function stop() {
-	var d = q.defer();
+function start (port) {
+    var d = q.defer();
 
-	sessions.destroyAll().then(function () {
-		io.close();
-		d.resolve();
-	});
+    port = port || 2048;
 
-	return d.promise;
+    var app = express();
+    app.use(bodyParser.json());
+
+    var server  = http.createServer(app);
+    var io      = socket_io(server);
+
+    var serverHandle = {
+        serverAddress: null,
+        onConnection: null,
+        beforeStop: null,
+        get: app.get.bind(app),
+        post: app.post.bind(app),
+        put: app.put.bind(app),
+        delete: app.delete.bind(app),
+        stop: function () {
+            var d = q.defer();
+
+            var beforeStop = serverHandle.beforeStop ? serverHandle.beforeStop() : null;
+
+            if (isThenable(beforeStop)) {
+                beforeStop.then(d.resolve);
+            } else {
+                d.resolve();
+            }
+
+            return d.promise;
+        }
+    };
+
+    io.on('connection', function (socket) {
+        if (serverHandle.onConnection) {
+            serverHandle.onConnection(socket);
+        }
+    });
+
+    try {
+        server.listen(port, function () {
+            var host = server.address().address;
+            var port = server.address().port;
+
+            if (host === '0.0.0.0') {
+                host = '127.0.0.1';
+            }
+
+            serverHandle.serverAddress = 'http://' + host + ':' + port;
+
+            d.resolve(serverHandle);
+        });
+    } catch (e) {
+        d.reject(e);
+    }
+
+    return d.promise;
 }
 
 exports.start = start;
-exports.stop = stop;
-exports.getAddress = function () {
-	return serverAddress;
-};
-
-
-

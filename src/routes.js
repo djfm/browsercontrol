@@ -1,101 +1,75 @@
 var browser = require('./browser');
-var sessions = require('./sessions');
 
-function wrapResponse (response) {
-	return function (result) {
-		if (result && result.isError) {
-			response.status(500).send(result);
-		} else {
-			response.send(result);
-		}
-	};
+function respondWithPromise (res, promise) {
+    promise.then(function (result) {
+        if (result && result.isError) {
+            res.status(500).send(result);
+        } else {
+            res.send(result);
+        }
+    }).fail(function (reason) {
+        res.status(500).send({
+            isError: true,
+            message: reason.toString(),
+            class: reason.constructor.name
+        });
+    });
 }
 
-function promiseResponse (response, promise) {
-	promise
-	.then(wrapResponse(response))
-	.fail(function (reason) {
-		response.status(500).send({
-			isError: true,
-			message: reason.toString(),
-			class: 'Error'
-		})
-	});
-}
+function setup (app, eventEmitter, sessions) {
 
-function sendError(response, klass, message) {
-	response.status(500).send({
-		isError: true,
-		message: message,
-		class: klass
-	});
-}
+    app.post('/session', function (req, res) {
+        respondWithPromise(res, browser.start(
+                req.body,
+                eventEmitter,
+                app.getServerAddress(),
+                sessions
+            )
+        );
+    });
 
-function setup(app, serverAddress) {
-	app.get('/', function (req, res) {
-		res.send('BrowserControl is up and running, ready to kick some HTML a**.');
-	});
+    app.get('/session/:sessionId', function (req, res) {
+        respondWithPromise(res, sessions.getCapabilities(req.params.sessionId));
+    });
 
-	app.post('/session', function (req, res) {
-		browser.start({
-			serverAddress: serverAddress,
-			requiredCapabilities: req.body.requiredCapabilities || {},
-			desiredCapabilities: req.body.desiredCapabilities || {}
-		}).then(function (data) {
-			res.send(data);
-		}).fail(function (err) {
-			res.status(500).send({
-				message: err.toString()
-			});
-		});
-	});
+    app.get('/sessions', function (req, res) {
+        respondWithPromise(res, sessions.list());
+    });
 
-	app.delete('/session/:id', function (req, res) {
-		promiseResponse(res, sessions.destroy(req.params.id));
-	});
+    app.delete('/session/:sessionId', function (req, res) {
+        respondWithPromise(res, sessions.destroy(req.params.sessionId));
+    });
 
-	app.get('/session/:id', function (req, res) {
-		var session = sessions.get(req.params.id);
-		if (session) {
-			res.send(session.actualCapabilities);
-		} else {
-			sendError(res, 'NoSuchSession');
-		}
-	});
+    app.post('/session/:sessionId/url', function (req, res) {
+        respondWithPromise(res, sessions.setURL(req.params.sessionId, req.body.url));
+    });
 
-	app.get('/sessions', function (req, res) {
-		res.send(sessions.getAllCapabilities());
-	});
+    app.get('/session/:sessionId/url', function (req, res) {
+        respondWithPromise(res, sessions.getURL(req.params.sessionId));
+    });
 
-	app.post('/session/:id/url', function (req, res) {
-		promiseResponse(res, sessions.setURL(req.params.id, req.body.url));
-	});
+    app.post('/session/:sessionId/element', function (req, res) {
+        respondWithPromise(res, sessions.findElement(req.params.sessionId, req.body));
+    });
 
-	app.get('/session/:id/url', function (req, res) {
-		promiseResponse(res, sessions.getURL(req.params.id));
-	});
+    app.post('/session/:sessionId/elements', function (req, res) {
+        respondWithPromise(res, sessions.findElements(req.params.sessionId, req.body));
+    });
 
-	app.post('/session/:id/element', function (req, res) {
-		promiseResponse(res, sessions.findElement(req.params.id, req.body));
-	});
+    app.get('/session/:sessionId/element/:elementId', function (req, res) {
+        respondWithPromise(res, sessions.describeElement(req.params.sessionId, req.params.elementId));
+    });
 
-	app.post('/session/:id/elements', function (req, res) {
-		promiseResponse(res, sessions.findElements(req.params.id, req.body));
-	});
+    app.post('/session/:sessionId/element/:elementId/element', function (req, res) {
+        req.body.root = req.params.elementId;
+        respondWithPromise(res, sessions.findElement(req.params.sessionId, req.body));
+    });
 
-	app.get('/session/:id/element/:elementId', function (req, res) {
-		promiseResponse(res, sessions.describeElement(req.params.id, req.params.elementId));
-	});
+    app.post('/session/:sessionId/element/:elementId/elements', function (req, res) {
+        req.body.root = req.params.elementId;
+        respondWithPromise(res, sessions.findElements(req.params.sessionId, req.body));
+    });
 
-	app.post('/session/:id/element/:elementId/element', function (req, res) {
-		req.body.root = req.params.elementId;
-		promiseResponse(res, sessions.findElement(req.params.id, req.body));
-	});
-
-	app.post('/session/:id/element/:elementId/elements', function (req, res) {
-		req.body.root = req.params.elementId;
-		promiseResponse(res, sessions.findElements(req.params.id, req.body));
-	});
 }
 
 exports.setup = setup;

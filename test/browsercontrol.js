@@ -8,7 +8,7 @@ var request = require('request');
 chai.use(require('chai-as-promised'));
 chai.should();
 
-var server = require('../src/server');
+var browsercontrol = require('../src/browsercontrol');
 
 function promiseRequest(url, method, payload) {
 	var d = q.defer();
@@ -38,32 +38,37 @@ function promiseRequest(url, method, payload) {
 	return d.promise;
 }
 
+var bcInstance;
+
 function get(path) {
-	var url = server.getAddress() + path;
+	var url = bcInstance.getServerAddress() + path;
 	return promiseRequest(url, 'GET');
 }
 
 function post(path, payload) {
-	var url = server.getAddress() + path;
+	var url = bcInstance.getServerAddress() + path;
 	return promiseRequest(url, 'POST', payload);
 }
 
 function del(path) {
-	var url = server.getAddress() + path;
+	var url = bcInstance.getServerAddress() + path;
 	return promiseRequest(url, 'DELETE');
 }
 
-before(function(done) {
-	server.start(0).then(done.bind(undefined, undefined));
+before(function (done) {
+	browsercontrol.start(0).then(function (instance) {
+		bcInstance = instance;
+		done();
+	}).fail(done);
 });
 
 describe('BrowserControl', function() {
 	describe('Session', function() {
 		it('should create a session...', function (done) {
 			post('/session')
-			.then(function (data) {
-				data.statusCode.should.equal(200);
-				data.body.sessionId.should.equal(1);
+			.then(function (response) {
+				response.statusCode.should.equal(200);
+				response.body.should.have.property('sessionId');
 				done();
 			})
 			.fail(done);
@@ -71,9 +76,9 @@ describe('BrowserControl', function() {
 
 		it('...and another one', function (done) {
 			post('/session')
-			.then(function (data) {
-				data.statusCode.should.equal(200);
-				data.body.sessionId.should.equal(2);
+			.then(function (response) {
+				response.statusCode.should.equal(200);
+				response.body.should.have.property('sessionId');
 				done();
 			})
 			.fail(done);
@@ -234,6 +239,12 @@ describe('BrowserControl', function() {
 	});
 });
 
-after(function(done) {
-	server.stop().then(done.bind(undefined, undefined));
+after(function (done) {
+	if (bcInstance) {
+		bcInstance.stop().then(function () {
+			done();
+		}).fail(done);
+	} else {
+		done();
+	}
 });
