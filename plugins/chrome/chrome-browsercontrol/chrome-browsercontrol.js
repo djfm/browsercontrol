@@ -2,19 +2,24 @@
 
 var socket = io(browsercontrol.serverAddress);
 
-var events = {};
-
-var tabsListening = {};
+var userSessionSettings = {
+	timeouts: {
+		script: 0,
+		implicit: 0,
+		'page load': 0
+	}
+};
 
 /**
  * Determine whether each tab is ready to reply to commands
  */
+var tabsListening = {};
 chrome.runtime.onMessage.addListener(function (request, sender, respond) {
 	if ('listening' === request.status) {
 		var tabListening = tabsListening[sender.tab.id] = tabsListening[sender.tab.id] || {callbacksQueue: []};
 		tabListening.status = 'listening';
 
-		// Called enqueued callbacks if any
+		// Call enqueued callbacks if any
 		for (var i = 0, len = tabListening.callbacksQueue.length; i < len; ++i) {
 			tabListening.callbacksQueue[i]();
 		}
@@ -23,8 +28,33 @@ chrome.runtime.onMessage.addListener(function (request, sender, respond) {
 		tabListening.callbacksQueue = [];
 
 		respond({});
+	} else if ('debugMessage' === request.type) {
+		socket.emit('debugMessage', request.data);
 	}
 });
+
+function debug (data) {
+	socket.emit('debugMessage', data);
+}
+
+/**
+ * Listen for tabs updates.
+ */
+var tabsCallbacks = [];
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+	for (var i = 0, len = tabsCallbacks.length; i < len;) {
+		if (tabsCallbacks[i](tabId, changeInfo, tab) === true) {
+			tabsCallbacks.splice(i, 1);
+			--len;
+		} else {
+			++i;
+		}
+	}
+});
+
+function onTabUpdate (callback) {
+	tabsCallbacks.push(callback);
+}
 
 /**
  * Send a message to a tab, queueing the request if
@@ -58,7 +88,8 @@ function askActiveTab (query, callback) {
 	});
 }
 
-function on (command, callback) {
+var events = {};
+function onBrowserControlCommand (command, callback) {
 	if (!events.hasOwnProperty(command)) {
 		events[command] = true;
 		socket.on(command, function (data) {
@@ -78,23 +109,7 @@ function withActiveTab (callback) {
 	});
 }
 
-var tabsCallbacks = [];
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-	for (var i = 0, len = tabsCallbacks.length; i < len;) {
-		if (tabsCallbacks[i](tabId, changeInfo, tab) === true) {
-			tabsCallbacks.splice(i, 1);
-			--len;
-		} else {
-			++i;
-		}
-	}
-});
-
-function onTabUpdate (callback) {
-	tabsCallbacks.push(callback);
-}
-
-on('setURL', function (url, respond) {
+onBrowserControlCommand('setURL', function (url, respond) {
 	withActiveTab(function (tab) {
 		onTabUpdate(function (tabId, changeInfo) {
 			if (tabId === tab.id && changeInfo.status === 'complete') {
@@ -106,10 +121,19 @@ on('setURL', function (url, respond) {
 	});
 });
 
-on('getURL', function (nothing, respond) {
+onBrowserControlCommand('getURL', function (nothing, respond) {
 	withActiveTab(function (tab) {
 		respond(tab.url);
 	});
+});
+
+onBrowserControlCommand('setTimeouts', function (timeouts, respond) {
+	userSessionSettings.timeouts = timeouts;
+	respond({});
+});
+
+onBrowserControlCommand('getTimeouts', function (nothing, respond) {
+	respond(userSessionSettings.timeouts);
 });
 
 var passAlongToActiveTab = [
@@ -121,10 +145,11 @@ var passAlongToActiveTab = [
 
 for (var i = 0, len = passAlongToActiveTab.length; i < len; ++i) {
 	(function (command) {
-		on(command, function (query, respond) {
+		onBrowserControlCommand(command, function (query, respond) {
 			askActiveTab({
 				command: command,
-				query: query
+				query: query,
+				userSessionSettings: userSessionSettings
 			}, respond);
 		});
 	})(passAlongToActiveTab[i]);

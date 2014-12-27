@@ -29,5 +29,12 @@
         <span id="cannot-click-visibility-hidden" style="visibility:hidden">I'm invisible</span>
         <div id="cannot-click-zero-width" style="width:0px;overflow:hidden">I'm invisible</div>
         <div id="cannot-click-zero-height" style="height:0px;overflow:hidden">I'm invisible</div>
+        <div id="eventually-on-page-container"></div>
+
+        <script>
+            window.setTimeout(function () {
+                document.getElementById('eventually-on-page-container').innerHTML = '<div id="eventually-on-page">Now I\'m here!</div>';
+            }, 1000);
+        </script>
     </body>
 </html>

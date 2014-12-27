@@ -1,4 +1,4 @@
-/* global before, after, describe, it */
+/* global before, beforeEach, after, describe, it */
 
 var chai = require('chai');
 var q = require('q');
@@ -39,6 +39,7 @@ function promiseRequest(url, method, payload) {
 }
 
 var bcInstance;
+var indexURL = 'file://' + __dirname + '/pages/index.html';
 
 function get(path) {
 	var url = bcInstance.getServerAddress() + path;
@@ -111,17 +112,57 @@ describe('BrowserControl', function() {
 		});
 
 		it('should navigate to a page', function (done) {
-			var url = 'file://' + __dirname + '/pages/index.html';
-
-			post('/session/1/url', {url: url})
+			post('/session/1/url', {url: indexURL})
 			.then(function () {
 				return get('/session/1/url');
 			})
 			.then(function (data) {
-				data.body.should.equal(url);
+				data.body.should.equal(indexURL);
 				done();
 			})
 			.fail(done);
+		});
+
+		describe('Timeouts', function () {
+
+			beforeEach(function () {
+				return post('/session/1/url', {url: indexURL});
+			});
+
+			after(function () {
+				return post('/session/1/timeouts', zeroTimeouts);
+			});
+
+			var zeroTimeouts = {
+				script: 0,
+				implicit: 0,
+				'page load': 0
+			};
+
+			var timeouts = {
+				script: 2000,
+				implicit: 5000,
+				'page load': 10000
+			};
+
+			it('with default timeouts, should not find element that will appear later', function (done) {
+				post('/session/1/element/', {using: 'id', value: 'eventually-on-page'})
+				.get('statusCode').should.become(500).notify(done);
+			});
+
+			it('should set timeouts', function (done) {
+				post('/session/1/timeouts', timeouts)
+				.then(function () {
+					return get('/session/1/timeouts').get('body');
+				})
+				.should.become(timeouts)
+				.notify(done);
+			});
+
+			it('with increased implicit timeout, should find element after a little while', function (done) {
+				post('/session/1/element/', {using: 'id', value: 'eventually-on-page'})
+				.get('statusCode').should.become(200).notify(done);
+			});
 		});
 
 		describe('findElement', function () {

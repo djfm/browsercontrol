@@ -52,6 +52,14 @@ function setup (app, eventEmitter, sessions) {
         respondWithPromise(res, sessions.findElement(req.params.sessionId, req.body));
     });
 
+    app.post('/session/:sessionId/timeouts', function (req, res) {
+        respondWithPromise(res, sessions.setTimeouts(req.params.sessionId, req.body));
+    });
+
+    app.get('/session/:sessionId/timeouts', function (req, res) {
+        respondWithPromise(res, sessions.getTimeouts(req.params.sessionId));
+    });
+
     app.post('/session/:sessionId/elements', function (req, res) {
         respondWithPromise(res, sessions.findElements(req.params.sessionId, req.body));
     });

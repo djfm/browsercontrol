@@ -45,6 +45,11 @@ module.exports = function () {
     function create (data) {
         var id = ++maxId;
         sessions[id] = data;
+
+        sessions[id].socket.on('debugMessage', function (data) {
+            console.log('DEBUG', data);
+        });
+
         return {
             sessionId: id
         };
@@ -103,7 +108,9 @@ module.exports = function () {
         'findElement',
         'findElements',
         'describeElement',
-        'clickElement'
+        'clickElement',
+        'setTimeouts',
+        'getTimeouts'
     ];
 
     _.each(extensionMethods, function (method) {
