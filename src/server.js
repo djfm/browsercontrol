@@ -19,6 +19,10 @@ function start (port) {
     var server  = http.createServer(app);
     var io      = socket_io(server);
 
+    app.get('/', function (req, res) {
+        res.send('This is BrowserControl to major Tom. Ready to kick some HTML a**.');
+    });
+
     var serverHandle = {
         serverAddress: null,
         onConnection: null,
