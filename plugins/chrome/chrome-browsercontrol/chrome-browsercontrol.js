@@ -110,10 +110,29 @@ function withActiveTab (callback) {
 }
 
 onBrowserControlCommand('setURL', function (url, respond) {
+
+	var timeout = userSessionSettings.timeouts['page load'];
+	var responseWasSent = false;
+	var timeoutHandle;
+
+	if (timeout > 0) {
+		timeoutHandle = window.setTimeout(function () {
+			responseWasSent = true;
+			respond({
+				isError: true,
+				class: 'Timeout',
+				message: 'Could not load `' + url + '` in the imparted time (' + timeout + 'ms).'
+			});
+		}, timeout);
+	}
+
 	withActiveTab(function (tab) {
 		onTabUpdate(function (tabId, changeInfo) {
 			if (tabId === tab.id && changeInfo.status === 'complete') {
-				respond(url);
+				if (!responseWasSent) {
+					window.clearTimeout(timeoutHandle);
+					respond(url);
+				}
 				return true;
 			}
 		});

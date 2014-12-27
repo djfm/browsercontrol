@@ -142,12 +142,18 @@ describe('BrowserControl', function() {
 			var timeouts = {
 				script: 2000,
 				implicit: 5000,
-				'page load': 10000
+				'page load': 1000
 			};
 
 			it('with default timeouts, should not find element that will appear later', function (done) {
 				post('/session/1/element/', {using: 'id', value: 'eventually-on-page'})
 				.get('statusCode').should.become(500).notify(done);
+			});
+
+			it('with default timeouts, should be able to load a slow page', function (done) {
+				this.timeout(3000);
+				post('/session/1/url/', {url: bcInstance.getServerAddress() + '/test/slow/2000'})
+				.get('statusCode').should.become(200).notify(done);
 			});
 
 			it('should set timeouts', function (done) {
@@ -163,9 +169,25 @@ describe('BrowserControl', function() {
 				post('/session/1/element/', {using: 'id', value: 'eventually-on-page'})
 				.get('statusCode').should.become(200).notify(done);
 			});
+
+			it('with a page load timeout, should not be able to load a slow page', function (done) {
+				this.timeout(3000);
+				post('/session/1/url/', {url: bcInstance.getServerAddress() + '/test/slow/2000'})
+				.then(function (response) {
+					response.statusCode.should.equal(500);
+					response.body.class.should.equal('Timeout');
+					done();
+				})
+				.fail(done);
+			});
 		});
 
 		describe('findElement', function () {
+
+			before(function () {
+				return post('/session/1/url', {url: indexURL});
+			});
+
 			_.each({
 				'css selector': ['#hello', '#not-hello'],
 				'id': ['hello', 'not-hello'],
@@ -245,6 +267,11 @@ describe('BrowserControl', function() {
 		});
 
 		describe('findElements', function () {
+
+			before(function () {
+				return post('/session/1/url', {url: indexURL});
+			});
+
 			_.each({
 				'css selector': {'#hello': 1},
 				'id': {'hello': 1},
@@ -306,6 +333,11 @@ describe('BrowserControl', function() {
 		});
 
 		describe('Click', function () {
+
+			before(function () {
+				return post('/session/1/url', {url: indexURL});
+			});
+
 			it('Should click on an element', function (done) {
 				post('/session/1/element', {using: 'id', value: 'click'})
 				.then(function (response) {

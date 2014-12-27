@@ -23,6 +23,12 @@ function start (port) {
         res.send('This is BrowserControl to major Tom. Ready to kick some HTML a**.');
     });
 
+    app.get('/test/slow/:timeout', function (req, res) {
+        setTimeout(function () {
+            res.send('ok');
+        }, parseInt(req.params.timeout, 10));
+    });
+
     var serverHandle = {
         serverAddress: null,
         onConnection: null,
