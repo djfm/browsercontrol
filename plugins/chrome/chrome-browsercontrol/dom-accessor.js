@@ -196,11 +196,84 @@ function clickElement (id, respond) {
     respond({});
 }
 
+var injectedScriptsCount = 0;
+function executeScript (options, sessionSettings, respond) {
+    var script = document.createElement('script');
+    var scriptId = chrome.runtime.id + '_injectedScript_' + (injectedScriptsCount++);
+    var scriptTimeoutHandle;
+
+    function scriptResponseListener (event) {
+        if (event.data.type === scriptId) {
+            cleanUp();
+            respond(event.data.scriptResult);
+        }
+    }
+
+    function cleanUp () {
+        window.removeEventListener('message', scriptResponseListener);
+        script.parentNode.removeChild(script);
+        if (scriptTimeoutHandle) {
+            window.clearTimeout(scriptTimeoutHandle);
+        }
+    }
+
+    function cancelScriptBecauseOfTimeout () {
+        cleanUp();
+        respond(error('Timeout'));
+    }
+
+    window.addEventListener('message', scriptResponseListener);
+
+    var args = options.args || [];
+
+    var serializedArgs = [];
+    for (var i = 0, len = args.length; i < len; ++i) {
+        serializedArgs.push(JSON.stringify(args[i]));
+    }
+
+    if (options.async) {
+        // push the name of the callback as last argument
+        serializedArgs.push('__browserControlScriptFinished__');
+
+        if (sessionSettings.timeouts.script > 0) {
+            scriptTimeoutHandle = window.setTimeout(cancelScriptBecauseOfTimeout, sessionSettings.timeouts.script);
+        }
+    }
+
+    var argsArray = '[' + serializedArgs.join(', ') + ']';
+
+    var userScript = '(function () { ' + options.script + ' }).apply(undefined, ' + argsArray + ')';
+
+    var scriptBody = function (scriptId, userScript, async) {
+        /* jshint evil:true */
+
+        function __browserControlScriptFinished__ (scriptResult) {
+            window.postMessage({type: scriptId, scriptResult: scriptResult}, '*');
+        }
+
+        if (async) {
+            eval(userScript);
+        } else {
+            __browserControlScriptFinished__(eval(userScript));
+        }
+    };
+
+    var scriptArgs = [scriptId, userScript, options.async];
+
+
+    script.textContent = '(' + scriptBody.toString() + ').apply(undefined, ' + JSON.stringify(scriptArgs) + ');';
+    document.documentElement.appendChild(script);
+
+    // this is async
+    return true;
+}
+
 var commands = {
     findElement: findElement,
     findElements: findElements,
     describeElement: describeElement,
-    clickElement: clickElement
+    clickElement: clickElement,
+    executeScript: executeScript
 };
 
 // Inform the background page that we're ready to take orders.

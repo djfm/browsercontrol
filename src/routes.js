@@ -3,12 +3,12 @@ var browser = require('./browser');
 function respondWithPromise (res, promise) {
     promise.then(function (result) {
         if (result && result.isError) {
-            res.status(500).send(result);
+            res.status(500).json(result);
         } else {
-            res.send(result);
+            res.json(result);
         }
     }).fail(function (reason) {
-        res.status(500).send({
+        res.status(500).json({
             isError: true,
             message: reason.toString(),
             class: reason.constructor.name
@@ -80,6 +80,15 @@ function setup (app, eventEmitter, sessions) {
 
     app.post('/session/:sessionId/element/:elementId/click', function (req, res) {
         respondWithPromise(res, sessions.clickElement(req.params.sessionId, req.params.elementId));
+    });
+
+    app.post('/session/:sessionId/execute', function (req, res) {
+        respondWithPromise(res, sessions.executeScript(req.params.sessionId, req.body));
+    });
+
+    app.post('/session/:sessionId/execute_async', function (req, res) {
+        req.body.async = true;
+        respondWithPromise(res, sessions.executeScript(req.params.sessionId, req.body));
     });
 
 }

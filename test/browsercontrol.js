@@ -123,6 +123,51 @@ describe('BrowserControl', function() {
 			.fail(done);
 		});
 
+		describe('executeScript', function () {
+			before(function () {
+				return post('/session/1/url', {url: indexURL});
+			});
+
+			it('should compute 40 + 2', function (done) {
+				post('/session/1/execute', {
+					script: 'return 40 + 2'
+				})
+				.get('body').should.become(42)
+				.notify(done);
+			});
+
+			it('should compute 40 + 2 (using args)', function (done) {
+				post('/session/1/execute', {
+					script: 'return arguments[0] + arguments[1]',
+					args: [40, 2]
+				})
+				.get('body').should.become(42)
+				.notify(done);
+			});
+
+			it('should retrieve 42 from the page\'s globals', function (done) {
+				post('/session/1/execute', {
+					script: 'return fortyTwo'
+				})
+				.get('body').should.become(42)
+				.notify(done);
+			});
+		});
+
+		describe('executeScript (async)', function () {
+			before(function () {
+				return post('/session/1/url', {url: indexURL});
+			});
+
+			it('should compute 40 + 2 after a small timeout', function (done) {
+				post('/session/1/execute_async', {
+					script: 'var done = arguments[0]; window.setTimeout(function () {done(40 + 2);}, 42);'
+				})
+				.get('body').should.become(42)
+				.notify(done);
+			});
+		});
+
 		describe('Timeouts', function () {
 
 			beforeEach(function () {
@@ -140,7 +185,7 @@ describe('BrowserControl', function() {
 			};
 
 			var timeouts = {
-				script: 2000,
+				script: 300,
 				implicit: 5000,
 				'page load': 1000
 			};
@@ -176,6 +221,17 @@ describe('BrowserControl', function() {
 				.then(function (response) {
 					response.statusCode.should.equal(500);
 					response.body.class.should.equal('Timeout');
+					done();
+				})
+				.fail(done);
+			});
+
+			it('with a script timeout, should throw an error on long running async script', function (done) {
+				post('/session/1/execute_async', {
+					script: 'var done = arguments[0]; window.setTimeout(function () {done(40 + 2);}, 500);'
+				})
+				.then(function (response) {
+					response.statusCode.should.equal(500);
 					done();
 				})
 				.fail(done);

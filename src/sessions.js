@@ -110,7 +110,8 @@ module.exports = function () {
         'describeElement',
         'clickElement',
         'setTimeouts',
-        'getTimeouts'
+        'getTimeouts',
+        'executeScript'
     ];
 
     _.each(extensionMethods, function (method) {
