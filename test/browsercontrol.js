@@ -254,7 +254,7 @@ describe('BrowserControl', function() {
 				'tag name': ["a", "b"],
 				'xpath': ["//a", "//b"],
 			}, function (value, using) {
-				it('Should find `' + value[0] + '` using `' + using + '`', function (done) {
+				it('should find `' + value[0] + '` using `' + using + '`', function (done) {
 					post('/session/1/element', {
 						using: using,
 						value: value[0]
@@ -264,7 +264,7 @@ describe('BrowserControl', function() {
 					})
 					.fail(done);
 				});
-				it('Should not find `' + value[1] + '` using `' + using + '`', function (done) {
+				it('should not find `' + value[1] + '` using `' + using + '`', function (done) {
 					post('/session/1/element', {
 						using: using,
 						value: value[1]
@@ -277,7 +277,7 @@ describe('BrowserControl', function() {
 				});
 			});
 
-			it('Should throw an error if I try to get an element that does NOT exist', function (done) {
+			it('should throw an error if I try to get an element that does NOT exist', function (done) {
 				get('/session/1/element/1000').then(function (response) {
 					response.statusCode.should.equal(500);
 					response.body.class.should.equal('StaleElementReference');
@@ -286,7 +286,7 @@ describe('BrowserControl', function() {
 				.fail(done);
 			});
 
-			it('Should not throw an error if I try to get an element that DOES exist', function (done) {
+			it('should not throw an error if I try to get an element that DOES exist', function (done) {
 				get('/session/1/element/1').then(function (response) {
 					response.statusCode.should.equal(200);
 					done();
@@ -295,7 +295,7 @@ describe('BrowserControl', function() {
 			});
 
 			describe('Nested', function () {
-				it('Should find a nested element by css selector', function (done) {
+				it('should find a nested element by css selector', function (done) {
 					post('/session/1/element', {using: 'css selector', value: '#root'})
 					.get('response').get('body').get('ELEMENT')
 					.then(function (elementId) {
@@ -307,7 +307,7 @@ describe('BrowserControl', function() {
 					})
 					.fail(done);
 				});
-				it('Should find a nested element by xpath', function (done) {
+				it('should find a nested element by xpath', function (done) {
 					post('/session/1/element', {using: 'css selector', value: '#root'})
 					.get('response').get('body').get('ELEMENT')
 					.then(function (elementId) {
@@ -335,7 +335,7 @@ describe('BrowserControl', function() {
 				'name': {'stain': 1}
 			}, function (values, using) {
 				_.each(values, function (count, selector) {
-					it('Should find ' + count + ' result(s) for `' + selector + '` using `' + using + '`', function (done) {
+					it('should find ' + count + ' result(s) for `' + selector + '` using `' + using + '`', function (done) {
 						post('/session/1/elements', {
 							using: using,
 							value: selector
@@ -350,7 +350,7 @@ describe('BrowserControl', function() {
 			});
 
 			describe('Nested', function () {
-				it('Should find a nested element', function (done) {
+				it('should find a nested element', function (done) {
 					post('/session/1/element', {using: 'css selector', value: '#root'})
 					.get('response').get('body').get('ELEMENT')
 					.then(function (elementId) {
@@ -363,7 +363,7 @@ describe('BrowserControl', function() {
 					})
 					.fail(done);
 				});
-				it('Should not find a nested element that is not there', function (done) {
+				it('should not find a nested element that is not there', function (done) {
 					post('/session/1/element', {using: 'css selector', value: '#root'})
 					.get('response').get('body').get('ELEMENT')
 					.then(function (elementId) {
@@ -376,7 +376,7 @@ describe('BrowserControl', function() {
 					})
 					.fail(done);
 				});
-				it('Should throw a StaleElementReference if the root is not there', function (done) {
+				it('should throw a StaleElementReference if the root is not there', function (done) {
 					post('/session/1/element/6666/elements', {using: 'id', value: 'bob'})
 					.then(function (response) {
 						response.statusCode.should.equal(500);
@@ -455,7 +455,7 @@ describe('BrowserControl', function() {
 				return post('/session/1/url', {url: indexURL});
 			});
 
-			it('Should click on an element', function (done) {
+			it('should click on an element', function (done) {
 				post('/session/1/element', {using: 'id', value: 'click'})
 				.then(function (response) {
 					return post('/session/1/element/' + response.body.ELEMENT + '/click');
@@ -479,7 +479,7 @@ describe('BrowserControl', function() {
 			};
 
 			_.each(cannotClick, function (expectedError, cssSelector) {
-				it('Should not be able to click on `' + cssSelector + '` (because `' + expectedError +  '`)', function (done) {
+				it('should not be able to click on `' + cssSelector + '` (because `' + expectedError +  '`)', function (done) {
 					post('/session/1/element', {using: 'css selector', value: cssSelector}).get('body').get('ELEMENT')
 					.then(function (elementId) {
 						return post('/session/1/element/' + elementId + '/click');
