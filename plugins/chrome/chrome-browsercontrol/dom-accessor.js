@@ -197,6 +197,12 @@ function clickElement (id, respond) {
 }
 
 var injectedScriptsCount = 0;
+/**
+ * TODO:    JSON objects that define a WebElement reference will be converted to the corresponding DOM element.
+ * 			Likewise, any WebElements in the script result will be returned to the client as WebElement JSON objects.
+ *
+ * 			Cancel async script if unload event is fired.
+ */
 function executeScript (options, sessionSettings, respond) {
     var script = document.createElement('script');
     var scriptId = chrome.runtime.id + '_injectedScript_' + (injectedScriptsCount++);
