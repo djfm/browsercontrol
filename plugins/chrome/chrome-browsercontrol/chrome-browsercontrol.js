@@ -171,7 +171,8 @@ var passAlongToActiveTab = [
 	'findElements',
 	'describeElement',
 	'clickElement',
-	'executeScript'
+	'executeScript',
+	'getElementInfo'
 ];
 
 for (var i = 0, len = passAlongToActiveTab.length; i < len; ++i) {

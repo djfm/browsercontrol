@@ -108,6 +108,7 @@ module.exports = function () {
         'findElement',
         'findElements',
         'describeElement',
+        'getElementInfo',
         'clickElement',
         'setTimeouts',
         'getTimeouts',

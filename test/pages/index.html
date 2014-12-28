@@ -2,6 +2,12 @@
 <html>
     <head>
         <title>Test Page</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+            }
+        </style>
     </head>
     <body>
         <div id="hello">
@@ -13,6 +19,7 @@
         <div class="three">3</div>
         <div class="three">3</div>
         <div class="three">3</div>
+        <div id="text">GoT TEXT</div>
         <div id="root">
             <div class="child"></div>
             <span>xpath</span>
@@ -30,6 +37,8 @@
         <div id="cannot-click-zero-width" style="width:0px;overflow:hidden">I'm invisible</div>
         <div id="cannot-click-zero-height" style="height:0px;overflow:hidden">I'm invisible</div>
         <div id="eventually-on-page-container"></div>
+
+        <div id="square" style="width:50px;height:50px;background-color:orange;">50x50 square</div>
 
         <script>
             window.setTimeout(function () {

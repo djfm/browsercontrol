@@ -388,6 +388,67 @@ describe('BrowserControl', function() {
 			});
 		});
 
+		describe('getElementInfo', function () {
+
+			before(function () {
+				return post('/session/1/url', {url: indexURL});
+			});
+
+			var tests = [
+				{
+					type: 'text',
+					selector: {
+						using: 'id',
+						value: 'text'
+					},
+					expectedResponseBody: 'GoT TEXT'
+				},
+				{
+					type: 'value',
+					selector: {
+						using: 'css selector',
+						value: '[name=stain]'
+					},
+					expectedResponseBody: 'My Name is Stain, I don\'t complain.'
+				},
+				{
+					type: 'name',
+					selector: {
+						using: 'css selector',
+						value: 'div'
+					},
+					expectedResponseBody: 'DIV'
+				},
+				{
+					type: 'location',
+					selector: {
+						using: 'id',
+						value: 'hello'
+					},
+					expectedResponseBody: {x: 0, y:0}
+				},
+				{
+					type: 'size',
+					selector: {
+						using: 'id',
+						value: 'square'
+					},
+					expectedResponseBody: {width: 50, height:50}
+				}
+			];
+
+			_.each(tests, function (test) {
+				it('should get the element\'s `' + test.type + '`', function (done) {
+					post('/session/1/element', test.selector).get('body').get('ELEMENT')
+					.then(function (elementId) {
+						return get('/session/1/element/' + elementId + '/' + test.type);
+					})
+					.get('body').should.become(test.expectedResponseBody)
+					.notify(done);
+				});
+			});
+		});
+
 		describe('Click', function () {
 
 			before(function () {

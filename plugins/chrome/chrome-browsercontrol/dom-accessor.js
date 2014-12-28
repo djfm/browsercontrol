@@ -172,13 +172,15 @@ function describeElement (id, respond) {
     respond({ELEMENT: id});
 }
 
+function elementDisplayed ($element) {
+    return  $element.is(':visible') &&
+            $element.css('visibility') !== 'hidden' &&
+            $element.width() !== 0 &&
+            $element.height() !== 0;
+}
+
 function ensureElementCanBeInteractedWith ($element) {
-    if (
-        !$element.is(':visible') ||
-        $element.css('visibility') === 'hidden' ||
-        $element.width() === 0 ||
-        $element.height() === 0
-    ) {
+    if (!elementDisplayed($element)) {
         throw new ElementNotVisible();
     }
 
@@ -274,12 +276,53 @@ function executeScript (options, sessionSettings, respond) {
     return true;
 }
 
+function getElementInfo (query, respond) {
+    var element = $(getElement(query.elementId));
+    //', 'size'
+    switch (query.type) {
+        case 'text':
+            respond(element.text());
+            break;
+        case 'value':
+            respond(element.val());
+            break;
+        case 'name':
+            respond(element.prop('tagName'));
+            break;
+        case 'selected':
+            respond(element.is(':selected'));
+            break;
+        case 'enabled':
+            respond(element.is(':enabled'));
+            break;
+        case 'displayed':
+            respond(elementDisplayed(element));
+            break;
+        case 'location':
+            var offset = element.offset();
+            respond({
+                x: offset.left,
+                y: offset.top
+            });
+            break;
+        case 'size':
+            respond({
+                width: element.width(),
+                height: element.height()
+            });
+            break;
+        default:
+            respond(error('UnknownCommand'));
+    }
+}
+
 var commands = {
     findElement: findElement,
     findElements: findElements,
     describeElement: describeElement,
     clickElement: clickElement,
-    executeScript: executeScript
+    executeScript: executeScript,
+    getElementInfo: getElementInfo
 };
 
 // Inform the background page that we're ready to take orders.

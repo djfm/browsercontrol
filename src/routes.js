@@ -1,4 +1,6 @@
+var _       = require('underscore');
 var browser = require('./browser');
+
 
 function respondWithPromise (res, promise) {
     promise.then(function (result) {
@@ -67,6 +69,20 @@ function setup (app, eventEmitter, sessions) {
     app.get('/session/:sessionId/element/:elementId', function (req, res) {
         respondWithPromise(res, sessions.describeElement(req.params.sessionId, req.params.elementId));
     });
+
+    /**
+     * TODO: untested: selected, enabled, displayed
+     */
+
+    _.each(['text', 'value', 'name', 'selected', 'enabled', 'displayed', 'location', 'size'], function (type) {
+        app.get('/session/:sessionId/element/:elementId/' + type, function (req, res) {
+            respondWithPromise(res, sessions.getElementInfo(req.params.sessionId, {
+                elementId: req.params.elementId,
+                type: type
+            }));
+        });
+    });
+
 
     app.post('/session/:sessionId/element/:elementId/element', function (req, res) {
         req.body.root = req.params.elementId;
