@@ -26,6 +26,7 @@
         </div>
         <div class="child"></div>
         <div class=".not-child"></div>
+        <button id="enabled-button">I'm enabled</button>
 
         <div id="click" onclick="javascript:this.innerHTML='<span id=&quot;clicked&quot;>clicked, thanks!</span>'">
             Click me please!
@@ -39,6 +40,18 @@
         <div id="eventually-on-page-container"></div>
 
         <div id="square" style="width:50px;height:50px;background-color:orange;">50x50 square</div>
+
+        <select>
+            <option>A</option>
+            <option>B</option>
+            <option selected id="selected-option">C</option>
+            <option id="non-selected-option">D</option>
+        </select>
+
+        <input type="radio" checked id="selected-radio">
+        <input type="radio" id="non-selected-radio">
+        <input type="checkbox" checked id="selected-checkbox">
+        <input type="checkbox" id="non-selected-checkbox">
 
         <script>
             window.setTimeout(function () {

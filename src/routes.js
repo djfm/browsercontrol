@@ -70,10 +70,6 @@ function setup (app, eventEmitter, sessions) {
         respondWithPromise(res, sessions.describeElement(req.params.sessionId, req.params.elementId));
     });
 
-    /**
-     * TODO: untested: selected, enabled, displayed
-     */
-
     _.each(['text', 'value', 'name', 'selected', 'enabled', 'displayed', 'location', 'size'], function (type) {
         app.get('/session/:sessionId/element/:elementId/' + type, function (req, res) {
             respondWithPromise(res, sessions.getElementInfo(req.params.sessionId, {

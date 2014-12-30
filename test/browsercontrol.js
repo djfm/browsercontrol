@@ -434,6 +434,70 @@ describe('BrowserControl', function() {
 						value: 'square'
 					},
 					expectedResponseBody: {width: 50, height:50}
+				},
+				{
+					type: 'enabled',
+					selector: {
+						using: 'id',
+						value: 'enabled-button'
+					},
+					expectedResponseBody: true
+				},
+				{
+					type: 'displayed',
+					selector: {
+						using: 'id',
+						value: 'hello'
+					},
+					expectedResponseBody: true
+				},
+				{
+					type: 'selected',
+					selector: {
+						using: 'id',
+						value: 'selected-option'
+					},
+					expectedResponseBody: true
+				},
+				{
+					type: 'selected',
+					selector: {
+						using: 'id',
+						value: 'selected-checkbox'
+					},
+					expectedResponseBody: true
+				},
+				{
+					type: 'selected',
+					selector: {
+						using: 'id',
+						value: 'selected-radio'
+					},
+					expectedResponseBody: true
+				},
+				{
+					type: 'selected',
+					selector: {
+						using: 'id',
+						value: 'non-selected-option'
+					},
+					expectedResponseBody: false
+				},
+				{
+					type: 'selected',
+					selector: {
+						using: 'id',
+						value: 'non-selected-checkbox'
+					},
+					expectedResponseBody: false
+				},
+				{
+					type: 'selected',
+					selector: {
+						using: 'id',
+						value: 'non-selected-radio'
+					},
+					expectedResponseBody: false
 				}
 			];
 

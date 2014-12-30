@@ -278,7 +278,6 @@ function executeScript (options, sessionSettings, respond) {
 
 function getElementInfo (query, respond) {
     var element = $(getElement(query.elementId));
-    //', 'size'
     switch (query.type) {
         case 'text':
             respond(element.text());
@@ -290,7 +289,7 @@ function getElementInfo (query, respond) {
             respond(element.prop('tagName'));
             break;
         case 'selected':
-            respond(element.is(':selected'));
+            respond(element.is(':selected') || element.is(':checked'));
             break;
         case 'enabled':
             respond(element.is(':enabled'));
