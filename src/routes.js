@@ -58,7 +58,7 @@ function respondWithPromise (res, promise) {
  /session/:sessionId/title                                          DONE
  /session/:sessionId/element                                        DONE
  /session/:sessionId/elements                                       DONE
- /session/:sessionId/element/active                                 TODO
+ /session/:sessionId/element/active                                 DONE~   partial, without native events this will never change
  /session/:sessionId/element/:id                                    DONE
  /session/:sessionId/element/:id/element                            DONE
  /session/:sessionId/element/:id/elements                           DONE
@@ -160,6 +160,10 @@ function setup (app, eventEmitter, sessions) {
 
     app.post('/session/:sessionId/element', function (req, res) {
         respondWithPromise(res, sessions.findElement(req.params.sessionId, req.body));
+    });
+
+    app.post('/session/:sessionId/element/active', function (req, res) {
+        respondWithPromise(res, sessions.findActiveElement(req.params.sessionId, req.body));
     });
 
     app.post('/session/:sessionId/timeouts', function (req, res) {

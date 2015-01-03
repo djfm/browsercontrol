@@ -179,6 +179,7 @@ onBrowserControlCommand('getWindowHandles', function (nothing, respond) {
 
 var passAlongToActiveTab = [
 	'findElement',
+	'findActiveElement',
 	'findElements',
 	'describeElement',
 	'clickElement',

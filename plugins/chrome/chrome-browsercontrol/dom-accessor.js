@@ -85,6 +85,10 @@ function findElement (query, sessionSettings, respond) {
     return (sessionSettings.timeouts.implicit > 0);
 }
 
+function findActiveElement (query, respond) {
+    respond({ELEMENT: assignElementId(document.activeElement)});
+}
+
 function findElements (query, sessionSettings, respond) {
     var selector = null;
     var xpath = false;
@@ -326,7 +330,8 @@ var commands = {
     clickElement: clickElement,
     executeScript: executeScript,
     getElementInfo: getElementInfo,
-    getSource: getSource
+    getSource: getSource,
+    findActiveElement: findActiveElement
 };
 
 // Inform the background page that we're ready to take orders.

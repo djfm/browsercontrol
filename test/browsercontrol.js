@@ -40,6 +40,7 @@ function promiseRequest(url, method, payload) {
 
 var bcInstance;
 var indexURL = 'file://' + __dirname + '/pages/index.html';
+var findActiveElementURL = 'file://' + __dirname + '/pages/findActiveElement.html';
 
 function get(path) {
 	var url = bcInstance.getServerAddress() + path;
@@ -267,6 +268,34 @@ describe('BrowserControl', function() {
 				})
 				.fail(done);
 			});
+		});
+
+		describe('findActiveElement', function () {
+			before(function () {
+				return post('/session/1/url', {url: findActiveElementURL});
+			});
+
+			it('should find that the body is active', function (done) {
+				post('/session/1/element/active').get('body').get('ELEMENT')
+				.then(function (elementId) {
+					get('/session/1/element/' + elementId + '/name').get('body').should.become('BODY').notify(done);
+				}).fail(done);
+			});
+
+			/** this seems to be doomed to fail unless I have native events :(
+			it('should notice that after a click, the active element changed', function (done) {
+				post('/session/1/element', {using: 'id', value: 'non-selected-checkbox'}).get('body').get('ELEMENT')
+				.then(function (checkboxId) {
+					post('/session/1/element/' + checkboxId + '/click').then(function () {
+						post('/session/1/element/active').get('body').get('ELEMENT')
+						.then(function (elementId) {
+							get('/session/1/element/' + elementId + '/name').get('body').should.become('INPUT').notify(done);
+						});
+					});
+				})
+				.fail(done);
+			});*/
+
 		});
 
 		describe('findElement', function () {

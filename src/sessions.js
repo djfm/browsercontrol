@@ -108,6 +108,7 @@ module.exports = function () {
         'getTitle',
         'getSource',
         'findElement',
+        'findActiveElement',
         'findElements',
         'describeElement',
         'getElementInfo',
