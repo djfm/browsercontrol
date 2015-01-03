@@ -18,6 +18,98 @@ function respondWithPromise (res, promise) {
     });
 }
 
+/**
+
+ TODO: https://code.google.com/p/selenium/wiki/JsonWireProtocol
+
+
+ /status                                                            TODO
+ /session                                                           DONE
+ /sessions                                                          DONE
+ /session/:sessionId                                                DONE
+ /session/:sessionId/timeouts                                       DONE
+ /session/:sessionId/timeouts/async_script                          TODO
+ /session/:sessionId/timeouts/implicit_wait                         TODO
+ /session/:sessionId/window_handle                                  TODO
+ /session/:sessionId/window_handles                                 TODO
+ /session/:sessionId/url                                            DONE
+ /session/:sessionId/forward                                        TODO
+ /session/:sessionId/back                                           TODO
+ /session/:sessionId/refresh                                        TODO
+ /session/:sessionId/execute                                        DONE~   partial, need to handle sending / returning of DOM nodes
+ /session/:sessionId/execute_async                                  DONE~   partial, need to handle sending / returning of DOM nodes
+ /session/:sessionId/screenshot                                     TODO
+
+ /session/:sessionId/ime/available_engines                          TODO
+ /session/:sessionId/ime/active_engine                              TODO
+ /session/:sessionId/ime/activated                                  TODO
+ /session/:sessionId/ime/deactivate                                 TODO
+ /session/:sessionId/ime/activate                                   TODO
+
+ /session/:sessionId/frame                                          TODO
+ /session/:sessionId/frame/parent                                   TODO
+ /session/:sessionId/window                                         TODO
+ /session/:sessionId/window/:windowHandle/size                      TODO
+ /session/:sessionId/window/:windowHandle/position                  TODO
+ /session/:sessionId/window/:windowHandle/maximize                  TODO
+ /session/:sessionId/cookie                                         TODO
+ /session/:sessionId/cookie/:name                                   TODO
+ /session/:sessionId/source                                         DONE
+ /session/:sessionId/title                                          DONE
+ /session/:sessionId/element                                        DONE
+ /session/:sessionId/elements                                       DONE
+ /session/:sessionId/element/active                                 TODO
+ /session/:sessionId/element/:id                                    DONE
+ /session/:sessionId/element/:id/element                            DONE
+ /session/:sessionId/element/:id/elements                           DONE
+ /session/:sessionId/element/:id/click                              DONE
+ /session/:sessionId/element/:id/submit                             TODO
+ /session/:sessionId/element/:id/text                               DONE~   partial, gets all the text, visible or not
+ /session/:sessionId/element/:id/value                              DONE
+ /session/:sessionId/keys                                           TODO
+ /session/:sessionId/element/:id/name                               DONE
+ /session/:sessionId/element/:id/clear                              TODO
+ /session/:sessionId/element/:id/selected                           DONE
+ /session/:sessionId/element/:id/enabled                            DONE
+ /session/:sessionId/element/:id/attribute/:name                    TODO
+ /session/:sessionId/element/:id/equals/:other                      TODO
+ /session/:sessionId/element/:id/displayed                          DONE
+ /session/:sessionId/element/:id/location                           DONE
+ /session/:sessionId/element/:id/location_in_view                   TODO
+ /session/:sessionId/element/:id/size                               DONE
+ /session/:sessionId/element/:id/css/:propertyName                  TODO
+ /session/:sessionId/orientation                                    TODO
+ /session/:sessionId/alert_text                                     TODO
+ /session/:sessionId/accept_alert                                   TODO
+ /session/:sessionId/dismiss_alert                                  TODO
+ /session/:sessionId/moveto                                         TODO
+ /session/:sessionId/click                                          TODO
+ /session/:sessionId/buttondown                                     TODO
+ /session/:sessionId/buttonup                                       TODO
+ /session/:sessionId/doubleclick                                    TODO
+ /session/:sessionId/touch/click                                    TODO
+ /session/:sessionId/touch/down                                     TODO
+ /session/:sessionId/touch/up                                       TODO
+ session/:sessionId/touch/move                                      TODO
+ session/:sessionId/touch/scroll                                    TODO
+ session/:sessionId/touch/scroll                                    TODO
+ session/:sessionId/touch/doubleclick                               TODO
+ session/:sessionId/touch/longclick                                 TODO
+ session/:sessionId/touch/flick                                     TODO
+ session/:sessionId/touch/flick                                     TODO
+ /session/:sessionId/location                                       TODO
+ /session/:sessionId/local_storage                                  TODO
+ /session/:sessionId/local_storage/key/:key                         TODO
+ /session/:sessionId/local_storage/size                             TODO
+ /session/:sessionId/session_storage                                TODO
+ /session/:sessionId/session_storage/key/:key                       TODO
+ /session/:sessionId/session_storage/size                           TODO
+ /session/:sessionId/log                                            TODO
+ /session/:sessionId/log/types                                      TODO
+ /session/:sessionId/application_cache/status                       TODO
+
+ */
+
 function setup (app, eventEmitter, sessions) {
 
     app.post('/session', function (req, res) {
