@@ -282,7 +282,6 @@ describe('BrowserControl', function() {
 				}).fail(done);
 			});
 
-			/** this seems to be doomed to fail unless I have native events :(
 			it('should notice that after a click, the active element changed', function (done) {
 				post('/session/1/element', {using: 'id', value: 'non-selected-checkbox'}).get('body').get('ELEMENT')
 				.then(function (checkboxId) {
@@ -294,7 +293,7 @@ describe('BrowserControl', function() {
 					});
 				})
 				.fail(done);
-			});*/
+			});
 
 		});
 

@@ -198,6 +198,7 @@ function clickElement (id, respond) {
 
     ensureElementCanBeInteractedWith(element);
 
+    element.focus();
     element.click();
     respond({});
 }

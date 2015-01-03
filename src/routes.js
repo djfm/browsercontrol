@@ -58,7 +58,7 @@ function respondWithPromise (res, promise) {
  /session/:sessionId/title                                          DONE
  /session/:sessionId/element                                        DONE
  /session/:sessionId/elements                                       DONE
- /session/:sessionId/element/active                                 DONE~   partial, without native events this will never change
+ /session/:sessionId/element/active                                 DONE
  /session/:sessionId/element/:id                                    DONE
  /session/:sessionId/element/:id/element                            DONE
  /session/:sessionId/element/:id/elements                           DONE
