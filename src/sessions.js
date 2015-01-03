@@ -105,6 +105,7 @@ module.exports = function () {
     var extensionMethods = [
         'getURL',
         'setURL',
+        'getTitle',
         'findElement',
         'findElements',
         'describeElement',

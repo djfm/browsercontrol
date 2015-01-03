@@ -123,6 +123,10 @@ describe('BrowserControl', function() {
 			.fail(done);
 		});
 
+		it('should get the page\'s title', function (done) {
+			get('/session/1/title').get('body').should.become('Test page for Browsercontrol').notify(done);
+		});
+
 		describe('executeScript', function () {
 			before(function () {
 				return post('/session/1/url', {url: indexURL});

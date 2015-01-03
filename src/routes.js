@@ -50,6 +50,10 @@ function setup (app, eventEmitter, sessions) {
         respondWithPromise(res, sessions.getURL(req.params.sessionId));
     });
 
+    app.get('/session/:sessionId/title', function (req, res) {
+        respondWithPromise(res, sessions.getTitle(req.params.sessionId));
+    });
+
     app.post('/session/:sessionId/element', function (req, res) {
         respondWithPromise(res, sessions.findElement(req.params.sessionId, req.body));
     });

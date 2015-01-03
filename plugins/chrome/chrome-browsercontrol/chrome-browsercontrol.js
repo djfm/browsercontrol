@@ -146,6 +146,12 @@ onBrowserControlCommand('getURL', function (nothing, respond) {
 	});
 });
 
+onBrowserControlCommand('getTitle', function (nothing, respond) {
+	withActiveTab(function (tab) {
+		respond(tab.title);
+	});
+});
+
 onBrowserControlCommand('setTimeouts', function (timeouts, respond) {
 	userSessionSettings.timeouts = timeouts;
 	respond({});
@@ -154,17 +160,6 @@ onBrowserControlCommand('setTimeouts', function (timeouts, respond) {
 onBrowserControlCommand('getTimeouts', function (nothing, respond) {
 	respond(userSessionSettings.timeouts);
 });
-
-/*
-onBrowserControlCommand('executeScript', function (options, respond) {
-	withActiveTab(function (tab) {
-		var args = options.args || [];
-		var code = '(function () { ' + options.script + ' }).apply(undefined, ' + JSON.stringify(args) + ')';
-		chrome.tabs.executeScript(tab.id, {code: code}, function (results) {
-			respond(results[0]);
-		});
-	});
-});*/
 
 var passAlongToActiveTab = [
 	'findElement',
