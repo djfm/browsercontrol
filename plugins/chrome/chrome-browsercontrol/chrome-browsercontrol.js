@@ -161,6 +161,22 @@ onBrowserControlCommand('getTimeouts', function (nothing, respond) {
 	respond(userSessionSettings.timeouts);
 });
 
+onBrowserControlCommand('getWindowHandle', function (nothing, respond) {
+	withActiveTab(function (tab) {
+		respond(tab.windowId);
+	});
+});
+
+onBrowserControlCommand('getWindowHandles', function (nothing, respond) {
+	chrome.windows.getAll(function (windows) {
+		var handles = [];
+		for (var i = 0, len = windows.length; i < len; ++i) {
+			handles.push(windows[i].id);
+		}
+		respond(handles);
+	});
+});
+
 var passAlongToActiveTab = [
 	'findElement',
 	'findElements',

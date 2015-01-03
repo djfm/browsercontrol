@@ -30,8 +30,8 @@ function respondWithPromise (res, promise) {
  /session/:sessionId/timeouts                                       DONE
  /session/:sessionId/timeouts/async_script                          TODO
  /session/:sessionId/timeouts/implicit_wait                         TODO
- /session/:sessionId/window_handle                                  TODO
- /session/:sessionId/window_handles                                 TODO
+ /session/:sessionId/window_handle                                  DONE?   Not so sure it is what the spec intended...
+ /session/:sessionId/window_handles                                 DONE?   Not so sure it is what the spec intended...
  /session/:sessionId/url                                            DONE
  /session/:sessionId/forward                                        TODO
  /session/:sessionId/back                                           TODO
@@ -40,11 +40,11 @@ function respondWithPromise (res, promise) {
  /session/:sessionId/execute_async                                  DONE~   partial, need to handle sending / returning of DOM nodes
  /session/:sessionId/screenshot                                     TODO
 
- /session/:sessionId/ime/available_engines                          TODO
- /session/:sessionId/ime/active_engine                              TODO
- /session/:sessionId/ime/activated                                  TODO
- /session/:sessionId/ime/deactivate                                 TODO
- /session/:sessionId/ime/activate                                   TODO
+ /session/:sessionId/ime/available_engines                          TODO?
+ /session/:sessionId/ime/active_engine                              TODO?
+ /session/:sessionId/ime/activated                                  TODO?
+ /session/:sessionId/ime/deactivate                                 TODO?
+ /session/:sessionId/ime/activate                                   TODO?
 
  /session/:sessionId/frame                                          TODO
  /session/:sessionId/frame/parent                                   TODO
@@ -148,6 +148,14 @@ function setup (app, eventEmitter, sessions) {
 
     app.get('/session/:sessionId/source', function (req, res) {
         respondWithPromise(res, sessions.getSource(req.params.sessionId));
+    });
+
+    app.get('/session/:sessionId/window_handle', function (req, res) {
+        respondWithPromise(res, sessions.getWindowHandle(req.params.sessionId));
+    });
+
+    app.get('/session/:sessionId/window_handles', function (req, res) {
+        respondWithPromise(res, sessions.getWindowHandles(req.params.sessionId));
     });
 
     app.post('/session/:sessionId/element', function (req, res) {

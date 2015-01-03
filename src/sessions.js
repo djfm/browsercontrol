@@ -114,7 +114,9 @@ module.exports = function () {
         'clickElement',
         'setTimeouts',
         'getTimeouts',
-        'executeScript'
+        'executeScript',
+        'getWindowHandle',
+        'getWindowHandles'
     ];
 
     _.each(extensionMethods, function (method) {

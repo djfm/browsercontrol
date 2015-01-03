@@ -137,6 +137,23 @@ describe('BrowserControl', function() {
 			});
 		});
 
+		describe('window handles', function () {
+
+			var currentHandle;
+
+			it('should get the current window handle', function (done) {
+				get('/session/1/window_handle').then(function (response) {
+					response.statusCode.should.equal(200);
+					currentHandle = response.body;
+					done();
+				}).fail(done);
+			});
+
+			it('should get all handles', function (done) {
+				get('/session/1/window_handles').get('body').should.become([currentHandle]).notify(done);
+			});
+		});
+
 		describe('executeScript', function () {
 			before(function () {
 				return post('/session/1/url', {url: indexURL});
