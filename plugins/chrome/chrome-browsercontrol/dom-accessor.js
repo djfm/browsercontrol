@@ -315,13 +315,18 @@ function getElementInfo (query, respond) {
     }
 }
 
+function getSource (query, respond) {
+    respond(document.documentElement.outerHTML);
+}
+
 var commands = {
     findElement: findElement,
     findElements: findElements,
     describeElement: describeElement,
     clickElement: clickElement,
     executeScript: executeScript,
-    getElementInfo: getElementInfo
+    getElementInfo: getElementInfo,
+    getSource: getSource
 };
 
 // Inform the background page that we're ready to take orders.

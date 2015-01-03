@@ -167,7 +167,8 @@ var passAlongToActiveTab = [
 	'describeElement',
 	'clickElement',
 	'executeScript',
-	'getElementInfo'
+	'getElementInfo',
+	'getSource'
 ];
 
 for (var i = 0, len = passAlongToActiveTab.length; i < len; ++i) {

@@ -106,6 +106,7 @@ module.exports = function () {
         'getURL',
         'setURL',
         'getTitle',
+        'getSource',
         'findElement',
         'findElements',
         'describeElement',

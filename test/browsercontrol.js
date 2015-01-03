@@ -127,6 +127,16 @@ describe('BrowserControl', function() {
 			get('/session/1/title').get('body').should.become('Test page for Browsercontrol').notify(done);
 		});
 
+		describe('getPageSource', function () {
+			it ('should get the source', function (done) {
+				get('/session/1/source').then(function (response) {
+					response.body.should.include('ImLookingForThisSTRINGInTheGETPAGESOURCEtestDO_NOT_REMOVE_IT.');
+					done();
+				})
+				.fail(done);
+			});
+		});
+
 		describe('executeScript', function () {
 			before(function () {
 				return post('/session/1/url', {url: indexURL});
