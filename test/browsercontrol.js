@@ -39,8 +39,11 @@ function promiseRequest(url, method, payload) {
 }
 
 var bcInstance;
-var indexURL = 'file://' + __dirname + '/pages/index.html';
-var findActiveElementURL = 'file://' + __dirname + '/pages/findActiveElement.html';
+
+function testPage (name) {
+	name = name || 'index';
+	return bcInstance.getServerAddress() + '/test/' + name + '.html';
+}
 
 function get(path) {
 	var url = bcInstance.getServerAddress() + path;
@@ -113,12 +116,12 @@ describe('BrowserControl', function() {
 		});
 
 		it('should navigate to a page', function (done) {
-			post('/session/1/url', {url: indexURL})
+			post('/session/1/url', {url: testPage()})
 			.then(function () {
 				return get('/session/1/url');
 			})
 			.then(function (data) {
-				data.body.should.equal(indexURL);
+				data.body.should.equal(testPage());
 				done();
 			})
 			.fail(done);
@@ -157,7 +160,7 @@ describe('BrowserControl', function() {
 
 		describe('executeScript', function () {
 			before(function () {
-				return post('/session/1/url', {url: indexURL});
+				return post('/session/1/url', {url: testPage()});
 			});
 
 			it('should compute 40 + 2', function (done) {
@@ -188,7 +191,7 @@ describe('BrowserControl', function() {
 
 		describe('executeScript (async)', function () {
 			before(function () {
-				return post('/session/1/url', {url: indexURL});
+				return post('/session/1/url', {url: testPage()});
 			});
 
 			it('should compute 40 + 2 after a small timeout', function (done) {
@@ -203,7 +206,7 @@ describe('BrowserControl', function() {
 		describe('Timeouts', function () {
 
 			beforeEach(function () {
-				return post('/session/1/url', {url: indexURL});
+				return post('/session/1/url', {url: testPage()});
 			});
 
 			after(function () {
@@ -272,7 +275,7 @@ describe('BrowserControl', function() {
 
 		describe('findActiveElement', function () {
 			before(function () {
-				return post('/session/1/url', {url: findActiveElementURL});
+				return post('/session/1/url', {url: testPage()});
 			});
 
 			it('should find that the body is active', function (done) {
@@ -300,7 +303,7 @@ describe('BrowserControl', function() {
 		describe('findElement', function () {
 
 			before(function () {
-				return post('/session/1/url', {url: indexURL});
+				return post('/session/1/url', {url: testPage()});
 			});
 
 			_.each({
@@ -384,7 +387,7 @@ describe('BrowserControl', function() {
 		describe('findElements', function () {
 
 			before(function () {
-				return post('/session/1/url', {url: indexURL});
+				return post('/session/1/url', {url: testPage()});
 			});
 
 			_.each({
@@ -450,7 +453,7 @@ describe('BrowserControl', function() {
 		describe('getElementInfo', function () {
 
 			before(function () {
-				return post('/session/1/url', {url: indexURL});
+				return post('/session/1/url', {url: testPage()});
 			});
 
 			var tests = [
@@ -575,7 +578,7 @@ describe('BrowserControl', function() {
 		describe('Click', function () {
 
 			before(function () {
-				return post('/session/1/url', {url: indexURL});
+				return post('/session/1/url', {url: testPage()});
 			});
 
 			it('should click on an element', function (done) {
