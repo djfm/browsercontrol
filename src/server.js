@@ -1,6 +1,7 @@
 var bodyParser  = require('body-parser');
 var http        = require('http');
 var express     = require('express');
+var path        = require('path');
 var q           = require('q');
 var socket_io   = require('socket.io');
 
@@ -28,6 +29,12 @@ function start (port) {
             res.send('ok');
         }, parseInt(req.params.timeout, 10));
     });
+
+    app.post('/test/submit', function (req, res) {
+        res.send('SUBMIT SUCCESSFUL');
+    });
+
+    app.use('/test', express.static(path.join(__dirname, '..', 'test', 'pages')));
 
     var serverHandle = {
         serverAddress: null,

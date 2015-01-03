@@ -575,6 +575,31 @@ describe('BrowserControl', function() {
 			});
 		});
 
+		describe('submit', function () {
+
+			beforeEach(function () {
+				return post('/session/1/url', {url: testPage()});
+			});
+
+			_.each(['#form', '#div-inside-form', '#button-inside-form'], function (selector) {
+				it('should submit the form by submitting element `' + selector + '`', function (done) {
+					post('/session/1/element', {using: 'css selector', value: selector})
+					.get('body').get('ELEMENT')
+					.then(function (elementId) {
+						return post('/session/1/element/' + elementId + '/submit')
+						.then(function () {
+							return get('/session/1/source');
+						})
+						.then(function (response) {
+							response.body.should.include('SUBMIT SUCCESSFUL');
+							done();
+						});
+					})
+					.fail(done);
+				});
+			});
+		});
+
 		describe('Click', function () {
 
 			before(function () {

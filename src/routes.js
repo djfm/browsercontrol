@@ -63,7 +63,7 @@ function respondWithPromise (res, promise) {
  /session/:sessionId/element/:id/element                            DONE
  /session/:sessionId/element/:id/elements                           DONE
  /session/:sessionId/element/:id/click                              DONE
- /session/:sessionId/element/:id/submit                             TODO
+ /session/:sessionId/element/:id/submit                             DONE
  /session/:sessionId/element/:id/text                               DONE~   partial, gets all the text, visible or not
  /session/:sessionId/element/:id/value                              DONE
  /session/:sessionId/keys                                           TODO
@@ -204,6 +204,10 @@ function setup (app, eventEmitter, sessions) {
 
     app.post('/session/:sessionId/element/:elementId/click', function (req, res) {
         respondWithPromise(res, sessions.clickElement(req.params.sessionId, req.params.elementId));
+    });
+
+    app.post('/session/:sessionId/element/:elementId/submit', function (req, res) {
+        respondWithPromise(res, sessions.submitElement(req.params.sessionId, req.params.elementId));
     });
 
     app.post('/session/:sessionId/execute', function (req, res) {

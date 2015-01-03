@@ -28,6 +28,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, respond) {
 		tabListening.callbacksQueue = [];
 
 		respond({});
+	} else if ('not listening' === request.status) {
+		if (tabsListening[sender.tab.id]) {
+			tabsListening[sender.tab.id].status = 'not listening';
+		}
 	} else if ('debugMessage' === request.type) {
 		socket.emit('debugMessage', request.data);
 	}
@@ -42,6 +46,13 @@ function debug (data) {
  */
 var tabsCallbacks = [];
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+
+	if ('complete' !== changeInfo.status) {
+		if (tabsListening[tabId]) {
+			tabsListening[tabId].status = 'not listening';
+		}
+	}
+
 	for (var i = 0, len = tabsCallbacks.length; i < len;) {
 		if (tabsCallbacks[i](tabId, changeInfo, tab) === true) {
 			tabsCallbacks.splice(i, 1);
@@ -70,9 +81,11 @@ function askTab (tabId, query, callback) {
 	if (!tabsListening[tabId]) {
 		tabsListening[tabId] = {
 			status: 'not listening',
-			callbacksQueue: [request]
+			callbacksQueue: []
 		};
-	} else if ('listening' === tabsListening[tabId].status) {
+	}
+
+	if ('listening' === tabsListening[tabId].status) {
 		request();
 	} else {
 		tabsListening[tabId].callbacksQueue.push(request);
@@ -180,6 +193,7 @@ onBrowserControlCommand('getWindowHandles', function (nothing, respond) {
 var passAlongToActiveTab = [
 	'findElement',
 	'findActiveElement',
+	'submitElement',
 	'findElements',
 	'describeElement',
 	'clickElement',

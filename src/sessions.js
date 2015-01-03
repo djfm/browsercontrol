@@ -113,6 +113,7 @@ module.exports = function () {
         'describeElement',
         'getElementInfo',
         'clickElement',
+        'submitElement',
         'setTimeouts',
         'getTimeouts',
         'executeScript',

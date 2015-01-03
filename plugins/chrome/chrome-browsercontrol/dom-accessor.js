@@ -203,6 +203,12 @@ function clickElement (id, respond) {
     respond({});
 }
 
+function submitElement (id, respond) {
+    var element = $(getElement(id));
+    element.closest('form').submit();
+    respond({});
+}
+
 var injectedScriptsCount = 0;
 /**
  * TODO:    JSON objects that define a WebElement reference will be converted to the corresponding DOM element.
@@ -332,7 +338,12 @@ var commands = {
     executeScript: executeScript,
     getElementInfo: getElementInfo,
     getSource: getSource,
-    findActiveElement: findActiveElement
+    findActiveElement: findActiveElement,
+    submitElement: submitElement
+};
+
+window.onbeforeunload = function () {
+    chrome.runtime.sendMessage({status: 'not listening'});
 };
 
 // Inform the background page that we're ready to take orders.
